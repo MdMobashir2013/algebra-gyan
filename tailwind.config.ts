@@ -26,7 +26,8 @@ export default {
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					foreground: 'hsl(var(--primary-foreground))',
+					glow: 'hsl(var(--primary-glow))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -62,6 +63,34 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				}
+			},
+			backgroundImage: {
+				'gradient-hero': 'var(--gradient-hero)',
+				'gradient-card': 'var(--gradient-card)',
+				'gradient-success': 'var(--gradient-success)',
+				'gradient-math': 'var(--gradient-math)'
+			},
+			boxShadow: {
+				'soft': 'var(--shadow-soft)',
+				'medium': 'var(--shadow-medium)',
+				'glow': 'var(--shadow-glow)',
+				'success': 'var(--shadow-success)'
+			},
+			fontSize: {
+				'hero': 'var(--font-size-hero)',
+				'title': 'var(--font-size-title)',
+				'heading': 'var(--font-size-heading)'
+			},
+			transitionTimingFunction: {
+				'smooth': 'cubic-bezier(0.4, 0, 0.2, 1)',
+				'bounce': 'cubic-bezier(0.68, -0.55, 0.265, 1.55)'
+			},
+			fontFamily: {
+				'hind': ['Hind Siliguri', 'sans-serif'],
+				'inter': ['Inter', 'sans-serif']
+			},
+			scale: {
+				'102': '1.02'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
