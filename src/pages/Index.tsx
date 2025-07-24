@@ -7,7 +7,8 @@ import { SolutionDisplay } from "@/components/SolutionDisplay";
 import { AlgebraSolver } from "@/lib/algebraSolver";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Star, Users, Trophy, Zap } from "lucide-react";
+import { Star, Users, Trophy, Zap, Heart } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface Solution {
   type: string;
@@ -203,6 +204,28 @@ const Index = () => {
                 হাজারো শিক্ষার্থীর পছন্দ
               </span>
             </div>
+
+            {/* Donation Button */}
+            <motion.div
+              className="mt-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1 }}
+            >
+              <Button
+                asChild
+                variant="hero"
+                className="font-['Hind_Siliguri'] text-lg px-8 py-3"
+              >
+                <a href="mailto:mdmobashir291@gmail.com?subject=বীজগণিত জ্ঞান - অনুদান">
+                  <Heart className="h-5 w-5 mr-2" />
+                  অনুদান করুন
+                </a>
+              </Button>
+              <p className="text-xs text-muted-foreground font-['Hind_Siliguri'] mt-2">
+                এই প্রকল্পটি বিনামূল্যে রাখতে সাহায্য করুন
+              </p>
+            </motion.div>
             
             <p className="text-sm text-muted-foreground font-['Hind_Siliguri'] mt-8">
               © ২০২৫ বীজগণিত জ্ঞান - মোঃ মোবাশশির হোসেন - সকল অধিকার সংরক্ষিত
