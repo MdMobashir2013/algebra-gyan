@@ -205,7 +205,7 @@ const Index = () => {
             </div>
             
             <p className="text-sm text-muted-foreground font-['Hind_Siliguri'] mt-8">
-              © ২০২৫ বীজগণিত জ্ঞান - Md Mobashir Hossain - সকল অধিকার সংরক্ষিত
+              © ২০২৫ বীজগণিত জ্ঞান - মোঃ মোবাশশির হোসেন - সকল অধিকার সংরক্ষিত
             </p>
           </motion.div>
         </div>
