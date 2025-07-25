@@ -7,7 +7,7 @@ import { SolutionDisplay } from "@/components/SolutionDisplay";
 import { AlgebraSolver } from "@/lib/algebraSolver";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Star, Users, Trophy, Zap, Heart } from "lucide-react";
+import { Star, Users, Trophy, Zap, Heart, Facebook, Twitter, Instagram, Linkedin, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Solution {
@@ -204,6 +204,83 @@ const Index = () => {
                 হাজারো শিক্ষার্থীর পছন্দ
               </span>
             </div>
+
+            {/* Share Buttons */}
+            <motion.div
+              className="mt-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.9 }}
+            >
+              <h3 className="text-lg font-semibold text-primary font-['Hind_Siliguri'] mb-4">
+                শেয়ার করুন
+              </h3>
+              <div className="flex items-center justify-center gap-4 flex-wrap">
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="font-['Hind_Siliguri']"
+                >
+                  <a 
+                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Facebook className="h-4 w-4 mr-2" />
+                    Facebook
+                  </a>
+                </Button>
+                
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="font-['Hind_Siliguri']"
+                >
+                  <a 
+                    href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent('বীজগণিত জ্ঞান - বাংলায় বীজগণিত সমাধান')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Twitter className="h-4 w-4 mr-2" />
+                    X (Twitter)
+                  </a>
+                </Button>
+                
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="font-['Hind_Siliguri']"
+                >
+                  <a 
+                    href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Linkedin className="h-4 w-4 mr-2" />
+                    LinkedIn
+                  </a>
+                </Button>
+                
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="font-['Hind_Siliguri']"
+                >
+                  <a 
+                    href={`https://wa.me/?text=${encodeURIComponent('বীজগণিত জ্ঞান - বাংলায় বীজগণিত সমাধান ' + window.location.href)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Share2 className="h-4 w-4 mr-2" />
+                    WhatsApp
+                  </a>
+                </Button>
+              </div>
+            </motion.div>
 
             {/* Donation Button */}
             <motion.div
