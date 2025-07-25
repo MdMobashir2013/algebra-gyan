@@ -226,73 +226,71 @@ export class AlgebraSolver {
   }
 
   private static solveHCF(problem: string): Solution {
-    // Extract numbers from the problem
-    const numbers = this.extractNumbers(problem);
+    // Extract algebraic expressions from the problem
+    const expressions = this.extractAlgebraicExpressions(problem);
     
-    if (numbers.length < 2) {
-      throw new Error('কমপক্ষে দুটি সংখ্যা প্রয়োজন গসাগু নির্ণয়ের জন্য।');
+    if (expressions.length < 2) {
+      throw new Error('কমপক্ষে দুটি বীজগাণিতিক রাশি প্রয়োজন গসাগু নির্ণয়ের জন্য।');
     }
 
     const steps: string[] = [
-      `গসাগু নির্ণয়: ${numbers.join(', ')}`
+      `বীজগাণিতিক গসাগু নির্ণয়: ${expressions.join(', ')}`
     ];
 
-    let result = numbers[0];
-    for (let i = 1; i < numbers.length; i++) {
-      const currentHCF = this.calculateHCF(result, numbers[i]);
-      steps.push(`গসাগু(${result}, ${numbers[i]}) = ${currentHCF}`);
-      result = currentHCF;
-    }
-
-    // Show prime factorization steps for better understanding
-    numbers.forEach(num => {
-      const factors = this.getPrimeFactors(num);
-      steps.push(`${num} = ${factors.join(' × ')}`);
+    // Factor each expression
+    const factorizations: string[][] = [];
+    expressions.forEach(expr => {
+      const factors = this.factorExpression(expr);
+      factorizations.push(factors);
+      steps.push(`${expr} = ${factors.join(' × ')}`);
     });
 
-    steps.push(`সাধারণ উৎপাদক: ${this.getCommonFactors(numbers).join(', ')}`);
-    steps.push(`গসাগু = ${result}`);
+    // Find common factors
+    const commonFactors = this.findCommonAlgebraicFactors(factorizations);
+    steps.push(`সাধারণ উৎপাদক: ${commonFactors.join(', ')}`);
+    
+    const hcf = commonFactors.length > 0 ? commonFactors.join(' × ') : '1';
+    steps.push(`গসাগু = ${hcf}`);
 
     return {
       type: 'hcf',
       variable: 'গসাগু',
       steps,
-      solution: `গসাগু = ${result}`
+      solution: `গসাগু = ${hcf}`
     };
   }
 
   private static solveLCM(problem: string): Solution {
-    // Extract numbers from the problem
-    const numbers = this.extractNumbers(problem);
+    // Extract algebraic expressions from the problem
+    const expressions = this.extractAlgebraicExpressions(problem);
     
-    if (numbers.length < 2) {
-      throw new Error('কমপক্ষে দুটি সংখ্যা প্রয়োজন লসাগু নির্ণয়ের জন্য।');
+    if (expressions.length < 2) {
+      throw new Error('কমপক্ষে দুটি বীজগাণিতিক রাশি প্রয়োজন লসাগু নির্ণয়ের জন্য।');
     }
 
     const steps: string[] = [
-      `লসাগু নির্ণয়: ${numbers.join(', ')}`
+      `বীজগাণিতিক লসাগু নির্ণয়: ${expressions.join(', ')}`
     ];
 
-    let result = numbers[0];
-    for (let i = 1; i < numbers.length; i++) {
-      const currentLCM = this.calculateLCM(result, numbers[i]);
-      steps.push(`লসাগু(${result}, ${numbers[i]}) = ${currentLCM}`);
-      result = currentLCM;
-    }
-
-    // Show prime factorization steps
-    numbers.forEach(num => {
-      const factors = this.getPrimeFactors(num);
-      steps.push(`${num} = ${factors.join(' × ')}`);
+    // Factor each expression
+    const factorizations: string[][] = [];
+    expressions.forEach(expr => {
+      const factors = this.factorExpression(expr);
+      factorizations.push(factors);
+      steps.push(`${expr} = ${factors.join(' × ')}`);
     });
 
-    steps.push(`লসাগু = ${result}`);
+    // Calculate LCM using all unique factors with highest powers
+    const lcmFactors = this.calculateAlgebraicLCM(factorizations);
+    const lcm = lcmFactors.join(' × ');
+    
+    steps.push(`লসাগু = ${lcm}`);
 
     return {
       type: 'lcm',
       variable: 'লসাগু',
       steps,
-      solution: `লসাগু = ${result}`
+      solution: `লসাগু = ${lcm}`
     };
   }
 
@@ -354,5 +352,143 @@ export class AlgebraSolver {
       }
     }
     return factors.sort((a, b) => a - b);
+  }
+
+  private static extractAlgebraicExpressions(text: string): string[] {
+    // Remove common words and extract expressions
+    const cleanText = text.replace(/hcf|lcm|গসাগু|লসাগু|গ\.সা\.গু|ল\.সা\.গু|নির্ণয়|করুন|এর|of|and/gi, '');
+    
+    // Match algebraic expressions like x+2, x^2-1, (x+1), etc.
+    const matches = cleanText.match(/\(?[a-z\d\+\-\*\^\(\)]+\)?/gi);
+    if (!matches) return [];
+    
+    return matches
+      .map(expr => expr.trim().replace(/^,|,$/, ''))
+      .filter(expr => expr.length > 0 && expr.match(/[a-z]/i));
+  }
+
+  private static factorExpression(expr: string): string[] {
+    // Remove parentheses if surrounding the entire expression
+    expr = expr.replace(/^\((.+)\)$/, '$1');
+    
+    // Handle common algebraic patterns
+    
+    // Difference of squares: x^2 - a^2 = (x-a)(x+a)
+    let diffSquareMatch = expr.match(/^([a-z])(\^?2)?\s*-\s*(\d+)$/i);
+    if (diffSquareMatch) {
+      const variable = diffSquareMatch[1];
+      const constant = Math.sqrt(Number(diffSquareMatch[3]));
+      if (Number.isInteger(constant)) {
+        return [`(${variable}-${constant})`, `(${variable}+${constant})`];
+      }
+    }
+    
+    // Perfect square: x^2 + 2ax + a^2 = (x+a)^2
+    let perfectSquareMatch = expr.match(/^([a-z])(\^?2)?\s*\+\s*(\d+)([a-z])?\s*\+\s*(\d+)$/i);
+    if (perfectSquareMatch) {
+      const variable = perfectSquareMatch[1];
+      const middleTerm = Number(perfectSquareMatch[3]);
+      const constant = Number(perfectSquareMatch[5]);
+      const a = Math.sqrt(constant);
+      if (Number.isInteger(a) && middleTerm === 2 * a) {
+        return [`(${variable}+${a})`, `(${variable}+${a})`];
+      }
+    }
+    
+    // Simple quadratic: x^2 + bx + c
+    let quadMatch = expr.match(/^([a-z])(\^?2)?\s*([+-]?\d*)([a-z])?\s*([+-]?\d+)$/i);
+    if (quadMatch) {
+      const variable = quadMatch[1];
+      const b = Number(quadMatch[3] || 1);
+      const c = Number(quadMatch[5]);
+      
+      // Find factors of c that add up to b
+      for (let i = 1; i <= Math.abs(c); i++) {
+        if (c % i === 0) {
+          const factor1 = i;
+          const factor2 = c / i;
+          if (factor1 + factor2 === b) {
+            return [`(${variable}+${factor1})`, `(${variable}+${factor2})`];
+          }
+          if (factor1 - factor2 === b) {
+            return [`(${variable}+${factor1})`, `(${variable}-${factor2})`];
+          }
+          if (-factor1 + factor2 === b) {
+            return [`(${variable}-${factor1})`, `(${variable}+${factor2})`];
+          }
+        }
+      }
+    }
+    
+    // Linear expressions: ax + b
+    let linearMatch = expr.match(/^(\d*)([a-z])\s*([+-]?\d+)$/i);
+    if (linearMatch) {
+      const coeff = Number(linearMatch[1] || 1);
+      const variable = linearMatch[2];
+      const constant = Number(linearMatch[3]);
+      const gcd = this.calculateHCF(Math.abs(coeff), Math.abs(constant));
+      if (gcd > 1) {
+        return [`${gcd}`, `(${coeff/gcd}${variable}${constant >= 0 ? '+' : ''}${constant/gcd})`];
+      }
+    }
+    
+    // If no pattern matches, return the expression as is
+    return [expr];
+  }
+
+  private static findCommonAlgebraicFactors(factorizations: string[][]): string[] {
+    if (factorizations.length === 0) return [];
+    
+    const common: string[] = [];
+    const firstFactors = factorizations[0];
+    
+    firstFactors.forEach(factor => {
+      const isCommonToAll = factorizations.every(factors => 
+        factors.some(f => this.areFactorsEqual(f, factor))
+      );
+      
+      if (isCommonToAll && !common.some(c => this.areFactorsEqual(c, factor))) {
+        common.push(factor);
+      }
+    });
+    
+    return common;
+  }
+
+  private static calculateAlgebraicLCM(factorizations: string[][]): string[] {
+    const allFactors = new Set<string>();
+    const factorCounts = new Map<string, number>();
+    
+    // Collect all unique factors and their maximum occurrences
+    factorizations.forEach(factors => {
+      const localCounts = new Map<string, number>();
+      
+      factors.forEach(factor => {
+        allFactors.add(factor);
+        localCounts.set(factor, (localCounts.get(factor) || 0) + 1);
+      });
+      
+      // Update global max counts
+      localCounts.forEach((count, factor) => {
+        const currentMax = factorCounts.get(factor) || 0;
+        factorCounts.set(factor, Math.max(currentMax, count));
+      });
+    });
+    
+    // Build LCM from factors with their maximum powers
+    const lcmFactors: string[] = [];
+    factorCounts.forEach((count, factor) => {
+      for (let i = 0; i < count; i++) {
+        lcmFactors.push(factor);
+      }
+    });
+    
+    return lcmFactors.length > 0 ? lcmFactors : ['1'];
+  }
+
+  private static areFactorsEqual(factor1: string, factor2: string): boolean {
+    // Normalize factors for comparison
+    const normalize = (f: string) => f.replace(/\s/g, '').toLowerCase();
+    return normalize(factor1) === normalize(factor2);
   }
 }
