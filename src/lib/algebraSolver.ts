@@ -7,7 +7,19 @@ interface Solution {
 
 export class AlgebraSolver {
   static solve(problem: string): Solution {
-    const equation = problem.replace(/\s/g, '');
+    const trimmedProblem = problem.trim();
+    
+    // Check for HCF problems
+    if (trimmedProblem.match(/hcf|gcd|গসাগু|গ\.সা\.গু/i)) {
+      return this.solveHCF(trimmedProblem);
+    }
+    
+    // Check for LCM problems
+    if (trimmedProblem.match(/lcm|লসাগু|ল\.সা\.গু/i)) {
+      return this.solveLCM(trimmedProblem);
+    }
+
+    const equation = trimmedProblem.replace(/\s/g, '');
 
     if (!equation.includes('=')) {
       throw new Error('এটি একটি বৈধ সমীকরণ নয়। দয়া করে "=" চিহ্ন যুক্ত সমীকরণ দিন।');
@@ -24,7 +36,7 @@ export class AlgebraSolver {
     }
 
     // Linear equation
-    return this.solveLinear(left, right, problem);
+    return this.solveLinear(left, right, trimmedProblem);
   }
 
   private static solveQuadratic(left: string, right: string): Solution {
@@ -211,5 +223,136 @@ export class AlgebraSolver {
     if (!coeffStr || coeffStr === '+') return defaultValue;
     if (coeffStr === '-') return -defaultValue;
     return Number(coeffStr) || defaultValue;
+  }
+
+  private static solveHCF(problem: string): Solution {
+    // Extract numbers from the problem
+    const numbers = this.extractNumbers(problem);
+    
+    if (numbers.length < 2) {
+      throw new Error('কমপক্ষে দুটি সংখ্যা প্রয়োজন গসাগু নির্ণয়ের জন্য।');
+    }
+
+    const steps: string[] = [
+      `গসাগু নির্ণয়: ${numbers.join(', ')}`
+    ];
+
+    let result = numbers[0];
+    for (let i = 1; i < numbers.length; i++) {
+      const currentHCF = this.calculateHCF(result, numbers[i]);
+      steps.push(`গসাগু(${result}, ${numbers[i]}) = ${currentHCF}`);
+      result = currentHCF;
+    }
+
+    // Show prime factorization steps for better understanding
+    numbers.forEach(num => {
+      const factors = this.getPrimeFactors(num);
+      steps.push(`${num} = ${factors.join(' × ')}`);
+    });
+
+    steps.push(`সাধারণ উৎপাদক: ${this.getCommonFactors(numbers).join(', ')}`);
+    steps.push(`গসাগু = ${result}`);
+
+    return {
+      type: 'hcf',
+      variable: 'গসাগু',
+      steps,
+      solution: `গসাগু = ${result}`
+    };
+  }
+
+  private static solveLCM(problem: string): Solution {
+    // Extract numbers from the problem
+    const numbers = this.extractNumbers(problem);
+    
+    if (numbers.length < 2) {
+      throw new Error('কমপক্ষে দুটি সংখ্যা প্রয়োজন লসাগু নির্ণয়ের জন্য।');
+    }
+
+    const steps: string[] = [
+      `লসাগু নির্ণয়: ${numbers.join(', ')}`
+    ];
+
+    let result = numbers[0];
+    for (let i = 1; i < numbers.length; i++) {
+      const currentLCM = this.calculateLCM(result, numbers[i]);
+      steps.push(`লসাগু(${result}, ${numbers[i]}) = ${currentLCM}`);
+      result = currentLCM;
+    }
+
+    // Show prime factorization steps
+    numbers.forEach(num => {
+      const factors = this.getPrimeFactors(num);
+      steps.push(`${num} = ${factors.join(' × ')}`);
+    });
+
+    steps.push(`লসাগু = ${result}`);
+
+    return {
+      type: 'lcm',
+      variable: 'লসাগু',
+      steps,
+      solution: `লসাগু = ${result}`
+    };
+  }
+
+  private static extractNumbers(text: string): number[] {
+    const matches = text.match(/\d+/g);
+    if (!matches) return [];
+    return matches.map(Number).filter(n => n > 0);
+  }
+
+  private static calculateHCF(a: number, b: number): number {
+    while (b !== 0) {
+      [a, b] = [b, a % b];
+    }
+    return a;
+  }
+
+  private static calculateLCM(a: number, b: number): number {
+    return (a * b) / this.calculateHCF(a, b);
+  }
+
+  private static getPrimeFactors(n: number): string[] {
+    const factors: string[] = [];
+    let divisor = 2;
+    
+    while (divisor * divisor <= n) {
+      while (n % divisor === 0) {
+        factors.push(divisor.toString());
+        n /= divisor;
+      }
+      divisor++;
+    }
+    
+    if (n > 1) {
+      factors.push(n.toString());
+    }
+    
+    return factors.length > 0 ? factors : [n.toString()];
+  }
+
+  private static getCommonFactors(numbers: number[]): number[] {
+    if (numbers.length === 0) return [];
+    
+    const allFactors = numbers.map(num => this.getAllFactors(num));
+    const common = allFactors[0].filter(factor => 
+      allFactors.every(factors => factors.includes(factor))
+    );
+    
+    return common.sort((a, b) => a - b);
+  }
+
+  private static getAllFactors(n: number): number[] {
+    const factors: number[] = [];
+    for (let i = 1; i <= Math.sqrt(n); i++) {
+      if (n % i === 0) {
+        factors.push(i);
+        if (i !== n / i) {
+          factors.push(n / i);
+        }
+      }
+    }
+    return factors.sort((a, b) => a - b);
   }
 }

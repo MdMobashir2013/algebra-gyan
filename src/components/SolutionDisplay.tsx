@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Target, BookOpen, Sparkles } from "lucide-react";
+import { CheckCircle, Target, BookOpen, Sparkles, Calculator, Divide } from "lucide-react";
 import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
 import { useState, useEffect } from "react";
@@ -37,6 +37,10 @@ export const SolutionDisplay = ({ problem, solution, isLoading, error }: Solutio
         return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'quadratic':
         return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'hcf':
+        return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'lcm':
+        return 'bg-teal-100 text-teal-800 border-teal-200';
       default:
         return 'bg-green-100 text-green-800 border-green-200';
     }
@@ -48,6 +52,10 @@ export const SolutionDisplay = ({ problem, solution, isLoading, error }: Solutio
         return <Target className="h-4 w-4" />;
       case 'quadratic':
         return <Sparkles className="h-4 w-4" />;
+      case 'hcf':
+        return <Divide className="h-4 w-4" />;
+      case 'lcm':
+        return <Calculator className="h-4 w-4" />;
       default:
         return <CheckCircle className="h-4 w-4" />;
     }
@@ -56,7 +64,9 @@ export const SolutionDisplay = ({ problem, solution, isLoading, error }: Solutio
   const getExplanation = (type: string) => {
     const explanations = {
       'linear': 'এক বা একাধিক চলকের সরল সমীকরণ সমাধানের জন্য, চলককে এক পাশে এবং সংখ্যা অন্য পাশে এনে চলকের মান নির্ণয় করা হয়।',
-      'quadratic': 'দ্বিঘাত সমীকরণ সমাধানের জন্য, সমীকরণকে ax²+bx+c=0 আকারে এনে বিচারক (D) ব্যবহার করে মূল বের করা হয়।'
+      'quadratic': 'দ্বিঘাত সমীকরণ সমাধানের জন্য, সমীকরণকে ax²+bx+c=0 আকারে এনে বিচারক (D) ব্যবহার করে মূল বের করা হয়।',
+      'hcf': 'গরিষ্ঠ সাধারণ উৎপাদক (গসাগু) নির্ণয়ের জন্য ইউক্লিডের অ্যালগরিদম ব্যবহার করা হয়। এটি দুই বা ততোধিক সংখ্যার সবচেয়ে বড় সাধারণ ভাজক।',
+      'lcm': 'লঘিষ্ঠ সাধারণ গুণিতক (লসাগু) নির্ণয়ের জন্য মৌলিক উৎপাদকে বিশ্লেষণ করা হয়। এটি দুই বা ততোধিক সংখ্যার সবচেয়ে ছোট সাধারণ গুণিতক।'
     };
     
     return explanations[type as keyof typeof explanations] || 'এই সমীকরণ সমাধানের জন্য বীজগণিতের মৌলিক নিয়ম প্রয়োগ করা হয়েছে।';
@@ -186,7 +196,10 @@ export const SolutionDisplay = ({ problem, solution, isLoading, error }: Solutio
                     <Badge className={getTypeColor(solution.type)}>
                       {getTypeIcon(solution.type)}
                       <span className="ml-1 font-['Hind_Siliguri']">
-                        {solution.type === 'linear' ? 'সরল সমীকরণ' : 'দ্বিঘাত সমীকরণ'}
+                        {solution.type === 'linear' ? 'সরল সমীকরণ' : 
+                         solution.type === 'quadratic' ? 'দ্বিঘাত সমীকরণ' :
+                         solution.type === 'hcf' ? 'গসাগু' :
+                         solution.type === 'lcm' ? 'লসাগু' : 'অন্যান্য'}
                       </span>
                     </Badge>
                   </div>

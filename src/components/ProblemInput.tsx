@@ -22,10 +22,11 @@ export const ProblemInput = ({ problem, setProblem, onSolve, isLoading }: Proble
   const examples = [
     { equation: "x + 7 = 15", description: "এক চলক বিশিষ্ট সমীকরণ" },
     { equation: "2y - 5 = 11", description: "গুণনীয়ক সহ সমীকরণ" },
-    { equation: "x + 2 = 2x - 1", description: "চলক দুই পাশে" },
     { equation: "x^2 + 5x + 6 = 0", description: "দ্বিঘাত সমীকরণ" },
     { equation: "(x + 3)/2 = 5", description: "ভগ্নাংশ সমীকরণ" },
-    { equation: "3x + 4 = x + 8", description: "চলক দুই পাশে" },
+    { equation: "HCF 12, 18", description: "গসাগু নির্ণয়" },
+    { equation: "LCM 6, 9, 12", description: "লসাগু নির্ণয়" },
+    { equation: "গসাগু 24, 36, 48", description: "একাধিক সংখ্যার গসাগু" },
   ];
 
   return (
@@ -58,7 +59,7 @@ export const ProblemInput = ({ problem, setProblem, onSolve, isLoading }: Proble
               onChange={(e) => setProblem(e.target.value)}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
-              placeholder="যেমন: x + 5 = 10, 2y - 3 = 7, x + 2 = 2x - 1, x^2 + 5x + 6 = 0..."
+              placeholder="যেমন: x + 5 = 10, x^2 + 5x + 6 = 0, HCF 12, 18, LCM 6, 9..."
               className="min-h-[120px] text-lg font-['Hind_Siliguri'] resize-none border-primary/30 focus:border-primary transition-all duration-300"
               style={{ 
                 backgroundColor: 'rgba(255, 255, 255, 0.8)',
