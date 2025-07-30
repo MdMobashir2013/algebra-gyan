@@ -355,81 +355,111 @@ export class AlgebraSolver {
   }
 
   private static extractAlgebraicExpressions(text: string): string[] {
-    // Remove common words and extract expressions
-    const cleanText = text.replace(/hcf|lcm|গসাগু|লসাগু|গ\.সা\.গু|ল\.সা\.গু|নির্ণয়|করুন|এর|of|and/gi, '');
+    // Remove common words and clean text
+    let cleanText = text.replace(/hcf|lcm|গসাগু|লসাগু|গ\.সা\.গু|ল\.সা\.গু|নির্ণয়|করুন|এর|of|and|find|between|,/gi, ' ');
     
-    // Match algebraic expressions like x+2, x^2-1, (x+1), etc.
-    const matches = cleanText.match(/\(?[a-z\d\+\-\*\^\(\)]+\)?/gi);
+    // Match properly formed algebraic expressions
+    // Handles: x+2, x^2-1, (x+1), 2x+3, x^2+2x+1, etc.
+    const expressionPattern = /(?:\()?(?:\d*[a-z](?:\^?\d+)?(?:[+-]\d*[a-z](?:\^?\d+)?)*(?:[+-]\d+)?|\d*[a-z](?:\^?\d+)?(?:[+-]\d+)?|\d+[a-z](?:\^?\d+)?)(?:\))?/gi;
+    
+    const matches = cleanText.match(expressionPattern);
     if (!matches) return [];
     
     return matches
-      .map(expr => expr.trim().replace(/^,|,$/, ''))
-      .filter(expr => expr.length > 0 && expr.match(/[a-z]/i));
+      .map(expr => expr.trim().replace(/^[,\s]+|[,\s]+$/g, ''))
+      .filter(expr => expr.length > 1 && expr.match(/[a-z]/i))
+      .slice(0, 5); // Limit to 5 expressions to avoid noise
   }
 
   private static factorExpression(expr: string): string[] {
-    // Remove parentheses if surrounding the entire expression
-    expr = expr.replace(/^\((.+)\)$/, '$1');
+    // Clean and normalize the expression
+    expr = expr.replace(/^\((.+)\)$/, '$1').replace(/\s/g, '');
     
-    // Handle common algebraic patterns
-    
-    // Difference of squares: x^2 - a^2 = (x-a)(x+a)
-    let diffSquareMatch = expr.match(/^([a-z])(\^?2)?\s*-\s*(\d+)$/i);
+    // Handle x^2 - a^2 (difference of squares)
+    let diffSquareMatch = expr.match(/^([a-z])(\^?2)?-(\d+)$/i);
     if (diffSquareMatch) {
       const variable = diffSquareMatch[1];
-      const constant = Math.sqrt(Number(diffSquareMatch[3]));
+      const constantSq = Number(diffSquareMatch[3]);
+      const constant = Math.sqrt(constantSq);
       if (Number.isInteger(constant)) {
         return [`(${variable}-${constant})`, `(${variable}+${constant})`];
       }
     }
     
-    // Perfect square: x^2 + 2ax + a^2 = (x+a)^2
-    let perfectSquareMatch = expr.match(/^([a-z])(\^?2)?\s*\+\s*(\d+)([a-z])?\s*\+\s*(\d+)$/i);
+    // Handle x^2 + 2ax + a^2 (perfect square trinomial)
+    let perfectSquareMatch = expr.match(/^([a-z])(\^?2)?([+-])(\d*)([a-z])?([+-])(\d+)$/i);
     if (perfectSquareMatch) {
       const variable = perfectSquareMatch[1];
-      const middleTerm = Number(perfectSquareMatch[3]);
-      const constant = Number(perfectSquareMatch[5]);
-      const a = Math.sqrt(constant);
-      if (Number.isInteger(a) && middleTerm === 2 * a) {
-        return [`(${variable}+${a})`, `(${variable}+${a})`];
+      const sign1 = perfectSquareMatch[3];
+      const coeff = Number(perfectSquareMatch[4] || 1);
+      const sign2 = perfectSquareMatch[6];
+      const constant = Number(perfectSquareMatch[7]);
+      
+      const sqrtConst = Math.sqrt(constant);
+      if (Number.isInteger(sqrtConst) && coeff === 2 * sqrtConst && sign1 === sign2) {
+        const sign = sign1 === '+' ? '+' : '-';
+        return [`(${variable}${sign}${sqrtConst})^2`];
       }
     }
     
-    // Simple quadratic: x^2 + bx + c
-    let quadMatch = expr.match(/^([a-z])(\^?2)?\s*([+-]?\d*)([a-z])?\s*([+-]?\d+)$/i);
+    // Handle ax^2 + bx + c (general quadratic)
+    let quadMatch = expr.match(/^(\d*)([a-z])(\^?2)?([+-]\d*)([a-z])?([+-]\d+)$/i);
     if (quadMatch) {
-      const variable = quadMatch[1];
-      const b = Number(quadMatch[3] || 1);
-      const c = Number(quadMatch[5]);
+      const a = Number(quadMatch[1] || 1);
+      const variable = quadMatch[2];
+      const bStr = quadMatch[4];
+      const c = Number(quadMatch[6]);
       
-      // Find factors of c that add up to b
-      for (let i = 1; i <= Math.abs(c); i++) {
-        if (c % i === 0) {
-          const factor1 = i;
-          const factor2 = c / i;
-          if (factor1 + factor2 === b) {
-            return [`(${variable}+${factor1})`, `(${variable}+${factor2})`];
-          }
-          if (factor1 - factor2 === b) {
-            return [`(${variable}+${factor1})`, `(${variable}-${factor2})`];
-          }
-          if (-factor1 + factor2 === b) {
-            return [`(${variable}-${factor1})`, `(${variable}+${factor2})`];
+      if (bStr) {
+        const b = Number(bStr.replace(variable, '') || (bStr.startsWith('+') ? '1' : '-1'));
+        
+        // Try to factor ax^2 + bx + c
+        for (let p = -20; p <= 20; p++) {
+          for (let q = -20; q <= 20; q++) {
+            if (p * q === a * c && p + q === b) {
+              const factor1 = a > 1 ? `(${a}${variable}${p >= 0 ? '+' : ''}${p})` : `(${variable}${p >= 0 ? '+' : ''}${p})`;
+              const factor2 = `(${variable}${q >= 0 ? '+' : ''}${q})`;
+              return [factor1, factor2];
+            }
           }
         }
       }
     }
     
-    // Linear expressions: ax + b
-    let linearMatch = expr.match(/^(\d*)([a-z])\s*([+-]?\d+)$/i);
+    // Handle simple linear: ax + b
+    let linearMatch = expr.match(/^(\d*)([a-z])([+-]\d+)$/i);
     if (linearMatch) {
-      const coeff = Number(linearMatch[1] || 1);
+      const a = Number(linearMatch[1] || 1);
       const variable = linearMatch[2];
-      const constant = Number(linearMatch[3]);
-      const gcd = this.calculateHCF(Math.abs(coeff), Math.abs(constant));
+      const b = Number(linearMatch[3]);
+      const gcd = this.calculateHCF(Math.abs(a), Math.abs(b));
+      
       if (gcd > 1) {
-        return [`${gcd}`, `(${coeff/gcd}${variable}${constant >= 0 ? '+' : ''}${constant/gcd})`];
+        const newA = a / gcd;
+        const newB = b / gcd;
+        return [`${gcd}`, `(${newA === 1 ? '' : newA}${variable}${newB >= 0 ? '+' : ''}${newB})`];
       }
+    }
+    
+    // Handle pure variable terms: ax, ax^2
+    let variableMatch = expr.match(/^(\d*)([a-z])(\^?\d+)?$/i);
+    if (variableMatch) {
+      const coeff = Number(variableMatch[1] || 1);
+      const variable = variableMatch[2];
+      const power = variableMatch[3] || '';
+      
+      if (coeff > 1) {
+        return [`${coeff}`, `${variable}${power}`];
+      }
+      return [`${variable}${power}`];
+    }
+    
+    // Handle constants
+    let constantMatch = expr.match(/^\d+$/);
+    if (constantMatch) {
+      const num = Number(expr);
+      const factors = this.getPrimeFactors(num);
+      return factors;
     }
     
     // If no pattern matches, return the expression as is
