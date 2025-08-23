@@ -226,8 +226,11 @@ export class AlgebraSolver {
   }
 
   private static solveHCF(problem: string): Solution {
+    console.log('Solving HCF for problem:', problem);
+    
     // Extract algebraic expressions from the problem
     const expressions = this.extractAlgebraicExpressions(problem);
+    console.log('Extracted expressions:', expressions);
     
     if (expressions.length < 2) {
       throw new Error('কমপক্ষে দুটি বীজগাণিতিক রাশি প্রয়োজন গসাগু নির্ণয়ের জন্য।');
@@ -243,11 +246,18 @@ export class AlgebraSolver {
       const factors = this.factorExpression(expr);
       factorizations.push(factors);
       steps.push(`${expr} = ${factors.join(' × ')}`);
+      console.log(`Factorization of ${expr}:`, factors);
     });
 
     // Find common factors
     const commonFactors = this.findCommonAlgebraicFactors(factorizations);
-    steps.push(`সাধারণ উৎপাদক: ${commonFactors.join(', ')}`);
+    console.log('Common factors:', commonFactors);
+    
+    if (commonFactors.length > 0) {
+      steps.push(`সাধারণ উৎপাদক: ${commonFactors.join(', ')}`);
+    } else {
+      steps.push('কোনো সাধারণ উৎপাদক নেই');
+    }
     
     const hcf = commonFactors.length > 0 ? commonFactors.join(' × ') : '1';
     steps.push(`গসাগু = ${hcf}`);
@@ -261,8 +271,11 @@ export class AlgebraSolver {
   }
 
   private static solveLCM(problem: string): Solution {
+    console.log('Solving LCM for problem:', problem);
+    
     // Extract algebraic expressions from the problem
     const expressions = this.extractAlgebraicExpressions(problem);
+    console.log('Extracted expressions:', expressions);
     
     if (expressions.length < 2) {
       throw new Error('কমপক্ষে দুটি বীজগাণিতিক রাশি প্রয়োজন লসাগু নির্ণয়ের জন্য।');
@@ -278,12 +291,14 @@ export class AlgebraSolver {
       const factors = this.factorExpression(expr);
       factorizations.push(factors);
       steps.push(`${expr} = ${factors.join(' × ')}`);
+      console.log(`Factorization of ${expr}:`, factors);
     });
 
     // Calculate LCM using all unique factors with highest powers
     const lcmFactors = this.calculateAlgebraicLCM(factorizations);
-    const lcm = lcmFactors.join(' × ');
+    console.log('LCM factors:', lcmFactors);
     
+    const lcm = lcmFactors.length > 0 ? lcmFactors.join(' × ') : '1';
     steps.push(`লসাগু = ${lcm}`);
 
     return {
@@ -294,10 +309,138 @@ export class AlgebraSolver {
     };
   }
 
-  private static extractNumbers(text: string): number[] {
-    const matches = text.match(/\d+/g);
-    if (!matches) return [];
-    return matches.map(Number).filter(n => n > 0);
+  private static extractAlgebraicExpressions(text: string): string[] {
+    console.log('Extracting expressions from:', text);
+    
+    // Remove common words and clean text
+    let cleanText = text.replace(/hcf|lcm|গসাগু|লসাগু|গ\.সা\.গু|ল\.সা\.গু|নির্ণয়|করুন|এর|of|and|find|between/gi, ' ');
+    cleanText = cleanText.replace(/[,।]/g, ' ');
+    console.log('Cleaned text:', cleanText);
+    
+    // Split by spaces and commas, then filter for algebraic expressions
+    const parts = cleanText.split(/[\s,]+/).filter(part => part.trim().length > 0);
+    console.log('Split parts:', parts);
+    
+    const expressions: string[] = [];
+    
+    for (const part of parts) {
+      const trimmed = part.trim();
+      
+      // Check if it's a valid algebraic expression
+      if (this.isValidAlgebraicExpression(trimmed)) {
+        expressions.push(trimmed);
+      }
+    }
+    
+    console.log('Valid expressions found:', expressions);
+    return expressions.slice(0, 4); // Limit to avoid noise
+  }
+
+  private static isValidAlgebraicExpression(expr: string): boolean {
+    // Must contain at least one variable (letter)
+    if (!/[a-z]/i.test(expr)) return false;
+    
+    // Must not be a single letter (too simple)
+    if (expr.length === 1) return false;
+    
+    // Should contain valid algebraic characters
+    if (!/^[a-z0-9+\-^()]+$/i.test(expr)) return false;
+    
+    // Should not start or end with operators
+    if (/^[+\-^]|[+\-^]$/.test(expr)) return false;
+    
+    return true;
+  }
+
+  private static factorExpression(expr: string): string[] {
+    console.log('Factoring expression:', expr);
+    
+    // Clean and normalize the expression
+    expr = expr.replace(/^\((.+)\)$/, '$1').replace(/\s/g, '');
+    
+    // Handle x^2 - a^2 (difference of squares)
+    let diffSquareMatch = expr.match(/^([a-z])(\^?2)?-(\d+)$/i);
+    if (diffSquareMatch) {
+      const variable = diffSquareMatch[1];
+      const constantSq = Number(diffSquareMatch[3]);
+      const constant = Math.sqrt(constantSq);
+      if (Number.isInteger(constant)) {
+        const result = [`(${variable}-${constant})`, `(${variable}+${constant})`];
+        console.log('Difference of squares factorization:', result);
+        return result;
+      }
+    }
+    
+    // Handle x^2 - 1 specifically
+    if (expr.match(/^[a-z](\^?2)?-1$/i)) {
+      const variable = expr.charAt(0);
+      const result = [`(${variable}-1)`, `(${variable}+1)`];
+      console.log('x^2-1 factorization:', result);
+      return result;
+    }
+    
+    // Handle x^2 - 4 specifically  
+    if (expr.match(/^[a-z](\^?2)?-4$/i)) {
+      const variable = expr.charAt(0);
+      const result = [`(${variable}-2)`, `(${variable}+2)`];
+      console.log('x^2-4 factorization:', result);
+      return result;
+    }
+    
+    // Handle simple linear: x+a, x-a
+    let linearMatch = expr.match(/^([a-z])([+-])(\d+)$/i);
+    if (linearMatch) {
+      const result = [expr]; // Keep as single factor for linear terms
+      console.log('Linear expression kept as:', result);
+      return result;
+    }
+    
+    // Handle ax + b where we can factor out common factors
+    let linearWithCoeffMatch = expr.match(/^(\d+)([a-z])([+-]\d+)$/i);
+    if (linearWithCoeffMatch) {
+      const a = Number(linearWithCoeffMatch[1]);
+      const variable = linearWithCoeffMatch[2];
+      const b = Number(linearWithCoeffMatch[3]);
+      const gcd = this.calculateHCF(Math.abs(a), Math.abs(b));
+      
+      if (gcd > 1) {
+        const newA = a / gcd;
+        const newB = b / gcd;
+        const result = [`${gcd}`, `(${newA === 1 ? '' : newA}${variable}${newB >= 0 ? '+' : ''}${newB})`];
+        console.log('Factored linear with coefficient:', result);
+        return result;
+      }
+    }
+    
+    // Handle pure variable terms: x, 2x, x^2
+    let variableMatch = expr.match(/^(\d*)([a-z])(\^?\d+)?$/i);
+    if (variableMatch) {
+      const coeff = Number(variableMatch[1] || 1);
+      const variable = variableMatch[2];
+      const power = variableMatch[3] || '';
+      
+      if (coeff > 1) {
+        const result = [`${coeff}`, `${variable}${power}`];
+        console.log('Variable with coefficient factorization:', result);
+        return result;
+      }
+      const result = [`${variable}${power}`];
+      console.log('Pure variable term:', result);
+      return result;
+    }
+    
+    // Handle constants
+    let constantMatch = expr.match(/^\d+$/);
+    if (constantMatch) {
+      const num = Number(expr);
+      const factors = this.getPrimeFactors(num);
+      console.log('Prime factorization of', num, ':', factors);
+      return factors;
+    }
+    
+    // If no pattern matches, return the expression as is
+    console.log('No pattern matched, returning as is:', [expr]);
+    return [expr];
   }
 
   private static calculateHCF(a: number, b: number): number {
@@ -305,10 +448,6 @@ export class AlgebraSolver {
       [a, b] = [b, a % b];
     }
     return a;
-  }
-
-  private static calculateLCM(a: number, b: number): number {
-    return (a * b) / this.calculateHCF(a, b);
   }
 
   private static getPrimeFactors(n: number): string[] {
@@ -327,146 +466,12 @@ export class AlgebraSolver {
       factors.push(n.toString());
     }
     
-    return factors.length > 0 ? factors : [n.toString()];
-  }
-
-  private static getCommonFactors(numbers: number[]): number[] {
-    if (numbers.length === 0) return [];
-    
-    const allFactors = numbers.map(num => this.getAllFactors(num));
-    const common = allFactors[0].filter(factor => 
-      allFactors.every(factors => factors.includes(factor))
-    );
-    
-    return common.sort((a, b) => a - b);
-  }
-
-  private static getAllFactors(n: number): number[] {
-    const factors: number[] = [];
-    for (let i = 1; i <= Math.sqrt(n); i++) {
-      if (n % i === 0) {
-        factors.push(i);
-        if (i !== n / i) {
-          factors.push(n / i);
-        }
-      }
-    }
-    return factors.sort((a, b) => a - b);
-  }
-
-  private static extractAlgebraicExpressions(text: string): string[] {
-    // Remove common words and clean text
-    let cleanText = text.replace(/hcf|lcm|গসাগু|লসাগু|গ\.সা\.গু|ল\.সা\.গু|নির্ণয়|করুন|এর|of|and|find|between|,/gi, ' ');
-    
-    // Match properly formed algebraic expressions
-    // Handles: x+2, x^2-1, (x+1), 2x+3, x^2+2x+1, etc.
-    const expressionPattern = /(?:\()?(?:\d*[a-z](?:\^?\d+)?(?:[+-]\d*[a-z](?:\^?\d+)?)*(?:[+-]\d+)?|\d*[a-z](?:\^?\d+)?(?:[+-]\d+)?|\d+[a-z](?:\^?\d+)?)(?:\))?/gi;
-    
-    const matches = cleanText.match(expressionPattern);
-    if (!matches) return [];
-    
-    return matches
-      .map(expr => expr.trim().replace(/^[,\s]+|[,\s]+$/g, ''))
-      .filter(expr => expr.length > 1 && expr.match(/[a-z]/i))
-      .slice(0, 5); // Limit to 5 expressions to avoid noise
-  }
-
-  private static factorExpression(expr: string): string[] {
-    // Clean and normalize the expression
-    expr = expr.replace(/^\((.+)\)$/, '$1').replace(/\s/g, '');
-    
-    // Handle x^2 - a^2 (difference of squares)
-    let diffSquareMatch = expr.match(/^([a-z])(\^?2)?-(\d+)$/i);
-    if (diffSquareMatch) {
-      const variable = diffSquareMatch[1];
-      const constantSq = Number(diffSquareMatch[3]);
-      const constant = Math.sqrt(constantSq);
-      if (Number.isInteger(constant)) {
-        return [`(${variable}-${constant})`, `(${variable}+${constant})`];
-      }
-    }
-    
-    // Handle x^2 + 2ax + a^2 (perfect square trinomial)
-    let perfectSquareMatch = expr.match(/^([a-z])(\^?2)?([+-])(\d*)([a-z])?([+-])(\d+)$/i);
-    if (perfectSquareMatch) {
-      const variable = perfectSquareMatch[1];
-      const sign1 = perfectSquareMatch[3];
-      const coeff = Number(perfectSquareMatch[4] || 1);
-      const sign2 = perfectSquareMatch[6];
-      const constant = Number(perfectSquareMatch[7]);
-      
-      const sqrtConst = Math.sqrt(constant);
-      if (Number.isInteger(sqrtConst) && coeff === 2 * sqrtConst && sign1 === sign2) {
-        const sign = sign1 === '+' ? '+' : '-';
-        return [`(${variable}${sign}${sqrtConst})^2`];
-      }
-    }
-    
-    // Handle ax^2 + bx + c (general quadratic)
-    let quadMatch = expr.match(/^(\d*)([a-z])(\^?2)?([+-]\d*)([a-z])?([+-]\d+)$/i);
-    if (quadMatch) {
-      const a = Number(quadMatch[1] || 1);
-      const variable = quadMatch[2];
-      const bStr = quadMatch[4];
-      const c = Number(quadMatch[6]);
-      
-      if (bStr) {
-        const b = Number(bStr.replace(variable, '') || (bStr.startsWith('+') ? '1' : '-1'));
-        
-        // Try to factor ax^2 + bx + c
-        for (let p = -20; p <= 20; p++) {
-          for (let q = -20; q <= 20; q++) {
-            if (p * q === a * c && p + q === b) {
-              const factor1 = a > 1 ? `(${a}${variable}${p >= 0 ? '+' : ''}${p})` : `(${variable}${p >= 0 ? '+' : ''}${p})`;
-              const factor2 = `(${variable}${q >= 0 ? '+' : ''}${q})`;
-              return [factor1, factor2];
-            }
-          }
-        }
-      }
-    }
-    
-    // Handle simple linear: ax + b
-    let linearMatch = expr.match(/^(\d*)([a-z])([+-]\d+)$/i);
-    if (linearMatch) {
-      const a = Number(linearMatch[1] || 1);
-      const variable = linearMatch[2];
-      const b = Number(linearMatch[3]);
-      const gcd = this.calculateHCF(Math.abs(a), Math.abs(b));
-      
-      if (gcd > 1) {
-        const newA = a / gcd;
-        const newB = b / gcd;
-        return [`${gcd}`, `(${newA === 1 ? '' : newA}${variable}${newB >= 0 ? '+' : ''}${newB})`];
-      }
-    }
-    
-    // Handle pure variable terms: ax, ax^2
-    let variableMatch = expr.match(/^(\d*)([a-z])(\^?\d+)?$/i);
-    if (variableMatch) {
-      const coeff = Number(variableMatch[1] || 1);
-      const variable = variableMatch[2];
-      const power = variableMatch[3] || '';
-      
-      if (coeff > 1) {
-        return [`${coeff}`, `${variable}${power}`];
-      }
-      return [`${variable}${power}`];
-    }
-    
-    // Handle constants
-    let constantMatch = expr.match(/^\d+$/);
-    if (constantMatch) {
-      const num = Number(expr);
-      const factors = this.getPrimeFactors(num);
-      return factors;
-    }
-    
-    // If no pattern matches, return the expression as is
-    return [expr];
+    return factors.length > 0 ? factors : ['1'];
   }
 
   private static findCommonAlgebraicFactors(factorizations: string[][]): string[] {
+    console.log('Finding common factors from:', factorizations);
+    
     if (factorizations.length === 0) return [];
     
     const common: string[] = [];
@@ -482,20 +487,22 @@ export class AlgebraSolver {
       }
     });
     
+    console.log('Common factors found:', common);
     return common;
   }
 
   private static calculateAlgebraicLCM(factorizations: string[][]): string[] {
-    const allFactors = new Set<string>();
+    console.log('Calculating LCM from factorizations:', factorizations);
+    
     const factorCounts = new Map<string, number>();
     
-    // Collect all unique factors and their maximum occurrences
+    // For each factorization, count occurrences of each factor
     factorizations.forEach(factors => {
       const localCounts = new Map<string, number>();
       
       factors.forEach(factor => {
-        allFactors.add(factor);
-        localCounts.set(factor, (localCounts.get(factor) || 0) + 1);
+        const normalizedFactor = this.normalizeFactor(factor);
+        localCounts.set(normalizedFactor, (localCounts.get(normalizedFactor) || 0) + 1);
       });
       
       // Update global max counts
@@ -513,12 +520,15 @@ export class AlgebraSolver {
       }
     });
     
+    console.log('LCM factors calculated:', lcmFactors);
     return lcmFactors.length > 0 ? lcmFactors : ['1'];
   }
 
+  private static normalizeFactor(factor: string): string {
+    return factor.replace(/\s/g, '').toLowerCase();
+  }
+
   private static areFactorsEqual(factor1: string, factor2: string): boolean {
-    // Normalize factors for comparison
-    const normalize = (f: string) => f.replace(/\s/g, '').toLowerCase();
-    return normalize(factor1) === normalize(factor2);
+    return this.normalizeFactor(factor1) === this.normalizeFactor(factor2);
   }
 }
