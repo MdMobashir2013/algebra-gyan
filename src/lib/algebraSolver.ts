@@ -254,33 +254,47 @@ export class AlgebraSolver {
     }
 
     const steps: string[] = [
-      `বীজগাণিতিক গসাগু নির্ণয়: ${expressions.join(', ')}`
+      `বীজগাণিতিক গসাগু নির্ণয়: ${expressions.join(', ')}`,
+      ``,
+      `ধাপ ১: প্রতিটি রাশিকে উৎপাদকে বিশ্লেষণ করি`
     ];
 
-    // Factor each expression
+    // Factor each expression with educational explanations
     const factorizations: string[][] = [];
-    expressions.forEach(expr => {
+    expressions.forEach((expr, index) => {
       const factors = this.factorExpression(expr);
       factorizations.push(factors);
       const formattedExpr = this.formatMathExpression(expr);
       const formattedFactors = factors.map(f => this.formatMathExpression(f));
+      
       steps.push(`${formattedExpr} = ${formattedFactors.join(' × ')}`);
+      
+      // Add educational notes for specific cases
+      if (expr.includes('^2') && expr.includes('-')) {
+        steps.push(`   (এটি বর্গের বিয়োগ: a² - b² = (a-b)(a+b))`);
+      } else if (factors.length === 1 && factors[0] === expr) {
+        steps.push(`   (এই রাশিটি আর ভাঙা যায় না)`);
+      }
+      
       console.log(`Factorization of ${expr}:`, factors);
     });
 
-    // Find common factors
+    steps.push(``, `ধাপ ২: সাধারণ উৎপাদক খুঁজে বের করি`);
+
+    // Find common factors with detailed explanation
     const commonFactors = this.findCommonAlgebraicFactors(factorizations);
     console.log('Common factors:', commonFactors);
     
     if (commonFactors.length > 0) {
       const formattedCommon = commonFactors.map(f => this.formatMathExpression(f));
-      steps.push(`সাধারণ উৎপাদক: ${formattedCommon.join(', ')}`);
+      steps.push(`সব রাশিতে মিল আছে এমন উৎপাদক: ${formattedCommon.join(', ')}`);
+      steps.push(`মনে রাখি: গসাগু হলো সবচেয়ে বড় সাধারণ উৎপাদক`);
     } else {
-      steps.push('কোনো সাধারণ উৎপাদক নেই');
+      steps.push('কোনো সাধারণ উৎপাদক নেই (সব রাশি সহমৌলিক)');
     }
     
     const hcf = commonFactors.length > 0 ? commonFactors.map(f => this.formatMathExpression(f)).join(' × ') : '1';
-    steps.push(`গসাগু = ${hcf}`);
+    steps.push(``, `∴ গসাগু = ${hcf}`);
 
     return {
       type: 'hcf',
@@ -302,26 +316,38 @@ export class AlgebraSolver {
     }
 
     const steps: string[] = [
-      `বীজগাণিতিক লসাগু নির্ণয়: ${expressions.join(', ')}`
+      `বীজগাণিতিক লসাগু নির্ণয়: ${expressions.join(', ')}`,
+      ``,
+      `ধাপ ১: প্রতিটি রাশিকে উৎপাদকে বিশ্লেষণ করি`
     ];
 
-    // Factor each expression
+    // Factor each expression with educational guidance
     const factorizations: string[][] = [];
-    expressions.forEach(expr => {
+    expressions.forEach((expr, index) => {
       const factors = this.factorExpression(expr);
       factorizations.push(factors);
       const formattedExpr = this.formatMathExpression(expr);
       const formattedFactors = factors.map(f => this.formatMathExpression(f));
+      
       steps.push(`${formattedExpr} = ${formattedFactors.join(' × ')}`);
+      
+      // Add educational notes
+      if (expr.includes('^2') && expr.includes('-')) {
+        steps.push(`   (বর্গের বিয়োগ সূত্র ব্যবহার করেছি)`);
+      }
+      
       console.log(`Factorization of ${expr}:`, factors);
     });
 
-    // Calculate LCM using all unique factors with highest powers
-    const lcmFactors = this.calculateAlgebraicLCM(factorizations);
+    steps.push(``, `ধাপ ২: লসাগু নির্ণয় করি`);
+    steps.push(`মনে রাখি: লসাগু = সব আলাদা উৎপাদকের সর্বোচ্চ ঘাত`);
+
+    // Calculate LCM with educational explanation
+    const lcmFactors = this.calculateAlgebraicLCMWithExplanation(factorizations, steps);
     console.log('LCM factors:', lcmFactors);
     
     const lcm = lcmFactors.length > 0 ? lcmFactors.map(f => this.formatMathExpression(f)).join(' × ') : '1';
-    steps.push(`লসাগু = ${lcm}`);
+    steps.push(``, `∴ লসাগু = ${lcm}`);
 
     return {
       type: 'lcm',
@@ -564,6 +590,73 @@ export class AlgebraSolver {
     
     console.log('Common factors found:', common);
     return common;
+  }
+
+  // Educational LCM calculation with step-by-step explanation
+  private static calculateAlgebraicLCMWithExplanation(factorizations: string[][], steps: string[]): string[] {
+    console.log('Calculating LCM with educational explanation:', factorizations);
+    
+    // Collect all unique factors with their maximum powers
+    const factorMap = new Map<string, { count: number; expressions: number[] }>();
+    
+    factorizations.forEach((factors, exprIndex) => {
+      // Count occurrences of each factor in this expression
+      const localFactorCounts = new Map<string, number>();
+      
+      factors.forEach(factor => {
+        const normalized = this.normalizeFactor(factor);
+        localFactorCounts.set(normalized, (localFactorCounts.get(normalized) || 0) + 1);
+      });
+      
+      // Update the global tracking
+      localFactorCounts.forEach((count, factor) => {
+        const current = factorMap.get(factor) || { count: 0, expressions: [] };
+        if (count > current.count) {
+          current.count = count;
+          current.expressions = [exprIndex];
+        } else if (count === current.count && !current.expressions.includes(exprIndex)) {
+          current.expressions.push(exprIndex);
+        }
+        factorMap.set(factor, current);
+      });
+    });
+
+    // Provide educational explanation
+    steps.push(`প্রতিটি আলাদা উৎপাদকের জন্য সর্বোচ্চ ঘাত নিব:`);
+    
+    const lcmFactors: string[] = [];
+    const sortedFactors = Array.from(factorMap.keys()).sort((a, b) => {
+      const aIsNumber = /^\d+$/.test(a);
+      const bIsNumber = /^\d+$/.test(b);
+      
+      if (aIsNumber && !bIsNumber) return -1;
+      if (!aIsNumber && bIsNumber) return 1;
+      if (aIsNumber && bIsNumber) return Number(a) - Number(b);
+      return a.localeCompare(b);
+    });
+    
+    sortedFactors.forEach(factor => {
+      const info = factorMap.get(factor)!;
+      const formattedFactor = this.formatMathExpression(factor);
+      
+      if (info.count === 1) {
+        steps.push(`• ${formattedFactor}: সর্বোচ্চ ঘাত = ¹ (১ বার)`);
+        lcmFactors.push(factor);
+      } else {
+        steps.push(`• ${formattedFactor}: সর্বোচ্চ ঘাত = ${info.count} (${info.count} বার)`);
+        for (let i = 0; i < info.count; i++) {
+          lcmFactors.push(factor);
+        }
+      }
+    });
+
+    if (lcmFactors.length === 0) {
+      steps.push(`কোনো উৎপাদক পাওয়া যায়নি, তাই লসাগু = 1`);
+      return ['1'];
+    }
+
+    console.log('LCM factors calculated with explanation:', lcmFactors);
+    return lcmFactors;
   }
 
   private static calculateAlgebraicLCM(factorizations: string[][]): string[] {
