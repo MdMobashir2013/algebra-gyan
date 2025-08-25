@@ -6,6 +6,23 @@ interface Solution {
 }
 
 export class AlgebraSolver {
+  // Format mathematical expressions for display
+  private static formatMathExpression(expr: string): string {
+    return expr
+      .replace(/\^2/g, '²')
+      .replace(/\^3/g, '³')
+      .replace(/\^4/g, '⁴')
+      .replace(/\^5/g, '⁵')
+      .replace(/\^6/g, '⁶')
+      .replace(/\^7/g, '⁷')
+      .replace(/\^8/g, '⁸')
+      .replace(/\^9/g, '⁹')
+      .replace(/\^(\d+)/g, (match, num) => {
+        const superscripts = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+        return num.split('').map((digit: string) => superscripts[parseInt(digit)]).join('');
+      });
+  }
+
   static solve(problem: string): Solution {
     const trimmedProblem = problem.trim();
     
@@ -61,8 +78,8 @@ export class AlgebraSolver {
     let discriminant = b * b - 4 * a * c;
     
     let steps = [
-      `${a}x² + ${b}x + ${c} = 0`,
-      `বিচারক (D) = b² - 4ac = (${b})² - 4×(${a})×(${c}) = ${discriminant}`
+      this.formatMathExpression(`${a}x^2 + ${b}x + ${c} = 0`),
+      this.formatMathExpression(`বিচারক (D) = b^2 - 4ac = (${b})^2 - 4×(${a})×(${c}) = ${discriminant}`)
     ];
 
     if (discriminant < 0) {
@@ -91,10 +108,10 @@ export class AlgebraSolver {
     let x1 = (-b + sqrtD) / (2 * a);
     let x2 = (-b - sqrtD) / (2 * a);
 
-    steps.push(`√D = √${discriminant} = ${sqrtD.toFixed(3)}`);
-    steps.push(`x = [-b ± √D]/2a`);
-    steps.push(`x₁ = [-(${b}) + ${sqrtD.toFixed(3)}]/(2×${a}) = ${x1.toFixed(3)}`);
-    steps.push(`x₂ = [-(${b}) - ${sqrtD.toFixed(3)}]/(2×${a}) = ${x2.toFixed(3)}`);
+      steps.push(`√D = √${discriminant} = ${sqrtD.toFixed(3)}`);
+      steps.push(`x = [-b ± √D]/2a`);
+      steps.push(`x₁ = [-(${b}) + ${sqrtD.toFixed(3)}]/(2×${a}) = ${x1.toFixed(3)}`);
+      steps.push(`x₂ = [-(${b}) - ${sqrtD.toFixed(3)}]/(2×${a}) = ${x2.toFixed(3)}`);
 
     return {
       type: 'quadratic',
@@ -245,7 +262,9 @@ export class AlgebraSolver {
     expressions.forEach(expr => {
       const factors = this.factorExpression(expr);
       factorizations.push(factors);
-      steps.push(`${expr} = ${factors.join(' × ')}`);
+      const formattedExpr = this.formatMathExpression(expr);
+      const formattedFactors = factors.map(f => this.formatMathExpression(f));
+      steps.push(`${formattedExpr} = ${formattedFactors.join(' × ')}`);
       console.log(`Factorization of ${expr}:`, factors);
     });
 
@@ -254,12 +273,13 @@ export class AlgebraSolver {
     console.log('Common factors:', commonFactors);
     
     if (commonFactors.length > 0) {
-      steps.push(`সাধারণ উৎপাদক: ${commonFactors.join(', ')}`);
+      const formattedCommon = commonFactors.map(f => this.formatMathExpression(f));
+      steps.push(`সাধারণ উৎপাদক: ${formattedCommon.join(', ')}`);
     } else {
       steps.push('কোনো সাধারণ উৎপাদক নেই');
     }
     
-    const hcf = commonFactors.length > 0 ? commonFactors.join(' × ') : '1';
+    const hcf = commonFactors.length > 0 ? commonFactors.map(f => this.formatMathExpression(f)).join(' × ') : '1';
     steps.push(`গসাগু = ${hcf}`);
 
     return {
@@ -290,7 +310,9 @@ export class AlgebraSolver {
     expressions.forEach(expr => {
       const factors = this.factorExpression(expr);
       factorizations.push(factors);
-      steps.push(`${expr} = ${factors.join(' × ')}`);
+      const formattedExpr = this.formatMathExpression(expr);
+      const formattedFactors = factors.map(f => this.formatMathExpression(f));
+      steps.push(`${formattedExpr} = ${formattedFactors.join(' × ')}`);
       console.log(`Factorization of ${expr}:`, factors);
     });
 
@@ -298,7 +320,7 @@ export class AlgebraSolver {
     const lcmFactors = this.calculateAlgebraicLCM(factorizations);
     console.log('LCM factors:', lcmFactors);
     
-    const lcm = lcmFactors.length > 0 ? lcmFactors.join(' × ') : '1';
+    const lcm = lcmFactors.length > 0 ? lcmFactors.map(f => this.formatMathExpression(f)).join(' × ') : '1';
     steps.push(`লসাগু = ${lcm}`);
 
     return {
@@ -312,36 +334,40 @@ export class AlgebraSolver {
   private static extractAlgebraicExpressions(text: string): string[] {
     console.log('Extracting expressions from:', text);
     
-    // Remove common words and clean text
-    let cleanText = text.replace(/hcf|lcm|গসাগু|লসাগু|গ\.সা\.গু|ল\.সা\.গু|নির্ণয়|করুন|এর|of|and|find|between/gi, ' ');
-    cleanText = cleanText.replace(/[,।]/g, ' ');
-    console.log('Cleaned text:', cleanText);
-    
-    // Split by spaces and commas, then filter for algebraic expressions
-    const parts = cleanText.split(/[\s,]+/).filter(part => part.trim().length > 0);
-    console.log('Split parts:', parts);
+    // More comprehensive regex patterns for algebraic expressions
+    const patterns = [
+      /\b\d*[a-z](\^?\d+)?([+-]\d*[a-z](\^?\d+)?)*([+-]\d+)?\b/gi, // Multi-term expressions like 2x+3, x^2-4
+      /\b\d*[a-z](\^?\d+)?\b/gi, // Simple terms like x, 2x, x^2
+      /\b\d+\b/g // Pure numbers
+    ];
     
     const expressions: string[] = [];
     
-    for (const part of parts) {
-      const trimmed = part.trim();
-      
-      // Check if it's a valid algebraic expression
-      if (this.isValidAlgebraicExpression(trimmed)) {
-        expressions.push(trimmed);
+    for (const pattern of patterns) {
+      const matches = text.match(pattern);
+      if (matches) {
+        matches.forEach(match => {
+          const cleaned = match.trim();
+          if (this.isValidAlgebraicExpression(cleaned) && !expressions.includes(cleaned)) {
+            expressions.push(cleaned);
+          }
+        });
       }
     }
     
     console.log('Valid expressions found:', expressions);
-    return expressions.slice(0, 4); // Limit to avoid noise
+    return expressions.slice(0, 4);
   }
 
   private static isValidAlgebraicExpression(expr: string): boolean {
-    // Must contain at least one variable (letter)
+    // Accept pure numbers for HCF/LCM
+    if (/^\d+$/.test(expr)) return true;
+    
+    // Must contain at least one variable (letter) for algebraic expressions
     if (!/[a-z]/i.test(expr)) return false;
     
-    // Must not be a single letter (too simple)
-    if (expr.length === 1) return false;
+    // Must be longer than single letter unless it's a simple variable
+    if (expr.length === 1 && /[a-z]/i.test(expr)) return true;
     
     // Should contain valid algebraic characters
     if (!/^[a-z0-9+\-^()]+$/i.test(expr)) return false;
@@ -358,88 +384,95 @@ export class AlgebraSolver {
     // Clean and normalize the expression
     expr = expr.replace(/^\((.+)\)$/, '$1').replace(/\s/g, '');
     
-    // Handle x^2 - a^2 (difference of squares)
-    let diffSquareMatch = expr.match(/^([a-z])(\^?2)?-(\d+)$/i);
-    if (diffSquareMatch) {
-      const variable = diffSquareMatch[1];
-      const constantSq = Number(diffSquareMatch[3]);
-      const constant = Math.sqrt(constantSq);
-      if (Number.isInteger(constant)) {
-        const result = [`(${variable}-${constant})`, `(${variable}+${constant})`];
-        console.log('Difference of squares factorization:', result);
-        return result;
+    // Handle pure constants first
+    if (/^\d+$/.test(expr)) {
+      const num = Number(expr);
+      if (num <= 1) return [expr];
+      const factors = this.getPrimeFactors(num);
+      console.log('Prime factorization of', num, ':', factors);
+      return factors;
+    }
+    
+    // Handle quadratic expressions: ax^2 + bx + c
+    let quadMatch = expr.match(/^(\d*)([a-z])\^?2([+-]\d*)([a-z])?([+-]\d+)?$/i);
+    if (quadMatch) {
+      const a = Number(quadMatch[1] || 1);
+      const variable = quadMatch[2];
+      const bCoeff = quadMatch[3] ? Number(quadMatch[3]) : 0;
+      const c = quadMatch[5] ? Number(quadMatch[5]) : 0;
+      
+      // Try to factor quadratics
+      if (c !== 0) {
+        // Look for factors of ac that add to b
+        for (let p = 1; p <= Math.abs(c); p++) {
+          if (c % p === 0) {
+            const q = c / p;
+            if (p + q === Math.abs(bCoeff)) {
+              const sign1 = bCoeff >= 0 ? '+' : '-';
+              const sign2 = c >= 0 ? '+' : '-';
+              const result = [`(${variable}${sign1}${p})`, `(${variable}${sign2}${Math.abs(q)})`];
+              console.log('Quadratic factorization:', result);
+              return result;
+            }
+          }
+        }
       }
     }
     
-    // Handle x^2 - 1 specifically
-    if (expr.match(/^[a-z](\^?2)?-1$/i)) {
-      const variable = expr.charAt(0);
-      const result = [`(${variable}-1)`, `(${variable}+1)`];
-      console.log('x^2-1 factorization:', result);
-      return result;
+    // Handle difference of squares: x^2 - a^2
+    let diffSquareMatch = expr.match(/^(\d*)([a-z])\^?2-(\d+)$/i);
+    if (diffSquareMatch) {
+      const coeff = Number(diffSquareMatch[1] || 1);
+      const variable = diffSquareMatch[2];
+      const constantSq = Number(diffSquareMatch[3]);
+      const constant = Math.sqrt(constantSq);
+      
+      if (Number.isInteger(constant)) {
+        let factors = [`(${variable}-${constant})`, `(${variable}+${constant})`];
+        if (coeff > 1) factors.unshift(coeff.toString());
+        console.log('Difference of squares factorization:', factors);
+        return factors;
+      }
     }
     
-    // Handle x^2 - 4 specifically  
-    if (expr.match(/^[a-z](\^?2)?-4$/i)) {
-      const variable = expr.charAt(0);
-      const result = [`(${variable}-2)`, `(${variable}+2)`];
-      console.log('x^2-4 factorization:', result);
-      return result;
-    }
-    
-    // Handle simple linear: x+a, x-a
-    let linearMatch = expr.match(/^([a-z])([+-])(\d+)$/i);
+    // Handle linear expressions: ax + b
+    let linearMatch = expr.match(/^(\d*)([a-z])([+-]\d+)$/i);
     if (linearMatch) {
-      const result = [expr]; // Keep as single factor for linear terms
-      console.log('Linear expression kept as:', result);
-      return result;
-    }
-    
-    // Handle ax + b where we can factor out common factors
-    let linearWithCoeffMatch = expr.match(/^(\d+)([a-z])([+-]\d+)$/i);
-    if (linearWithCoeffMatch) {
-      const a = Number(linearWithCoeffMatch[1]);
-      const variable = linearWithCoeffMatch[2];
-      const b = Number(linearWithCoeffMatch[3]);
+      const a = Number(linearMatch[1] || 1);
+      const variable = linearMatch[2];
+      const b = Number(linearMatch[3]);
       const gcd = this.calculateHCF(Math.abs(a), Math.abs(b));
       
       if (gcd > 1) {
         const newA = a / gcd;
         const newB = b / gcd;
-        const result = [`${gcd}`, `(${newA === 1 ? '' : newA}${variable}${newB >= 0 ? '+' : ''}${newB})`];
-        console.log('Factored linear with coefficient:', result);
+        const bSign = newB >= 0 ? '+' : '';
+        const result = [gcd.toString(), `(${newA === 1 ? '' : newA}${variable}${bSign}${newB})`];
+        console.log('Factored linear with GCD:', result);
         return result;
+      } else {
+        console.log('Linear expression (no common factor):', [expr]);
+        return [expr];
       }
     }
     
-    // Handle pure variable terms: x, 2x, x^2
+    // Handle simple variable terms: x, 2x, x^2, etc.
     let variableMatch = expr.match(/^(\d*)([a-z])(\^?\d+)?$/i);
     if (variableMatch) {
       const coeff = Number(variableMatch[1] || 1);
       const variable = variableMatch[2];
       const power = variableMatch[3] || '';
       
-      if (coeff > 1) {
-        const result = [`${coeff}`, `${variable}${power}`];
-        console.log('Variable with coefficient factorization:', result);
-        return result;
-      }
-      const result = [`${variable}${power}`];
-      console.log('Pure variable term:', result);
-      return result;
-    }
-    
-    // Handle constants
-    let constantMatch = expr.match(/^\d+$/);
-    if (constantMatch) {
-      const num = Number(expr);
-      const factors = this.getPrimeFactors(num);
-      console.log('Prime factorization of', num, ':', factors);
+      let factors = [];
+      if (coeff > 1) factors.push(coeff.toString());
+      factors.push(`${variable}${power}`);
+      
+      console.log('Variable term factorization:', factors);
       return factors;
     }
     
-    // If no pattern matches, return the expression as is
-    console.log('No pattern matched, returning as is:', [expr]);
+    // If no pattern matches, return as single factor
+    console.log('No factorization pattern matched, returning as single factor:', [expr]);
     return [expr];
   }
 
@@ -474,16 +507,32 @@ export class AlgebraSolver {
     
     if (factorizations.length === 0) return [];
     
-    const common: string[] = [];
-    const firstFactors = factorizations[0];
+    // Count occurrences of each factor across all factorizations
+    const factorCounts = new Map<string, number>();
     
-    firstFactors.forEach(factor => {
-      const isCommonToAll = factorizations.every(factors => 
-        factors.some(f => this.areFactorsEqual(f, factor))
-      );
-      
-      if (isCommonToAll && !common.some(c => this.areFactorsEqual(c, factor))) {
-        common.push(factor);
+    factorizations.forEach(factors => {
+      const uniqueFactors = new Set(factors.map(f => this.normalizeFactor(f)));
+      uniqueFactors.forEach(factor => {
+        factorCounts.set(factor, (factorCounts.get(factor) || 0) + 1);
+      });
+    });
+    
+    // Find factors that appear in ALL factorizations
+    const common: string[] = [];
+    factorCounts.forEach((count, factor) => {
+      if (count === factorizations.length) {
+        // Find the minimum occurrence count across all factorizations
+        let minCount = Infinity;
+        factorizations.forEach(factors => {
+          const normalizedFactors = factors.map(f => this.normalizeFactor(f));
+          const occurrences = normalizedFactors.filter(f => f === factor).length;
+          minCount = Math.min(minCount, occurrences);
+        });
+        
+        // Add the factor the minimum number of times it appears
+        for (let i = 0; i < minCount; i++) {
+          common.push(factor);
+        }
       }
     });
     
