@@ -393,33 +393,7 @@ export class AlgebraSolver {
       return factors;
     }
     
-    // Handle quadratic expressions: ax^2 + bx + c
-    let quadMatch = expr.match(/^(\d*)([a-z])\^?2([+-]\d*)([a-z])?([+-]\d+)?$/i);
-    if (quadMatch) {
-      const a = Number(quadMatch[1] || 1);
-      const variable = quadMatch[2];
-      const bCoeff = quadMatch[3] ? Number(quadMatch[3]) : 0;
-      const c = quadMatch[5] ? Number(quadMatch[5]) : 0;
-      
-      // Try to factor quadratics
-      if (c !== 0) {
-        // Look for factors of ac that add to b
-        for (let p = 1; p <= Math.abs(c); p++) {
-          if (c % p === 0) {
-            const q = c / p;
-            if (p + q === Math.abs(bCoeff)) {
-              const sign1 = bCoeff >= 0 ? '+' : '-';
-              const sign2 = c >= 0 ? '+' : '-';
-              const result = [`(${variable}${sign1}${p})`, `(${variable}${sign2}${Math.abs(q)})`];
-              console.log('Quadratic factorization:', result);
-              return result;
-            }
-          }
-        }
-      }
-    }
-    
-    // Handle difference of squares: x^2 - a^2
+    // Handle difference of squares: x²-a² or ax²-b²
     let diffSquareMatch = expr.match(/^(\d*)([a-z])\^?2-(\d+)$/i);
     if (diffSquareMatch) {
       const coeff = Number(diffSquareMatch[1] || 1);
@@ -428,35 +402,87 @@ export class AlgebraSolver {
       const constant = Math.sqrt(constantSq);
       
       if (Number.isInteger(constant)) {
-        let factors = [`(${variable}-${constant})`, `(${variable}+${constant})`];
-        if (coeff > 1) factors.unshift(coeff.toString());
+        let factors = [];
+        if (coeff > 1) factors.push(coeff.toString());
+        factors.push(`(${variable}-${constant})`);
+        factors.push(`(${variable}+${constant})`);
         console.log('Difference of squares factorization:', factors);
         return factors;
       }
     }
     
-    // Handle linear expressions: ax + b
+    // Handle perfect square trinomials: x²+2ax+a² or x²-2ax+a²
+    let perfectSquareMatch = expr.match(/^([a-z])\^?2([+-])(\d+)([a-z])([+-])(\d+)$/i);
+    if (perfectSquareMatch) {
+      const variable = perfectSquareMatch[1];
+      const middleSign = perfectSquareMatch[2];
+      const middleCoeff = Number(perfectSquareMatch[3]);
+      const constant = Number(perfectSquareMatch[6]);
+      
+      // Check if it's a perfect square: (x±a)²
+      const a = Math.sqrt(constant);
+      if (Number.isInteger(a) && middleCoeff === 2 * a) {
+        const sign = middleSign === '+' ? '+' : '-';
+        const result = [`(${variable}${sign}${a})`, `(${variable}${sign}${a})`];
+        console.log('Perfect square trinomial:', result);
+        return result;
+      }
+    }
+    
+    // Handle quadratic expressions: ax²+bx+c
+    let quadMatch = expr.match(/^(\d*)([a-z])\^?2([+-]\d*)([a-z])?([+-]\d+)?$/i);
+    if (quadMatch) {
+      const a = Number(quadMatch[1] || 1);
+      const variable = quadMatch[2];
+      const bStr = quadMatch[3] || '0';
+      const b = bStr === '+' || bStr === '' ? 0 : Number(bStr);
+      const cStr = quadMatch[5] || '0';
+      const c = cStr === '+' || cStr === '' ? 0 : Number(cStr);
+      
+      if (c !== 0 && a === 1) {
+        // Try to factor x²+bx+c = (x+p)(x+q) where p+q=b and p*q=c
+        for (let p = -Math.abs(c); p <= Math.abs(c); p++) {
+          if (p === 0) continue;
+          const q = c / p;
+          if (Number.isInteger(q) && p + q === b) {
+            const factors = [`(${variable}${p >= 0 ? '+' : ''}${p})`, `(${variable}${q >= 0 ? '+' : ''}${q})`];
+            console.log('Quadratic factorization:', factors);
+            return factors;
+          }
+        }
+      }
+    }
+    
+    // Handle linear expressions: ax+b or ax-b
     let linearMatch = expr.match(/^(\d*)([a-z])([+-]\d+)$/i);
     if (linearMatch) {
       const a = Number(linearMatch[1] || 1);
       const variable = linearMatch[2];
       const b = Number(linearMatch[3]);
+      
+      // Check if we can factor out a common factor
       const gcd = this.calculateHCF(Math.abs(a), Math.abs(b));
       
       if (gcd > 1) {
         const newA = a / gcd;
         const newB = b / gcd;
         const bSign = newB >= 0 ? '+' : '';
-        const result = [gcd.toString(), `(${newA === 1 ? '' : newA}${variable}${bSign}${newB})`];
-        console.log('Factored linear with GCD:', result);
-        return result;
+        const factors = [gcd.toString()];
+        if (newA === 1) {
+          factors.push(`(${variable}${bSign}${newB})`);
+        } else {
+          factors.push(`(${newA}${variable}${bSign}${newB})`);
+        }
+        console.log('Factored linear with GCD:', factors);
+        return factors;
       } else {
-        console.log('Linear expression (no common factor):', [expr]);
+        // Linear expression cannot be factored further
+        console.log('Linear expression (prime):', [expr]);
         return [expr];
       }
     }
     
-    // Handle simple variable terms: x, 2x, x^2, etc.
+    // Handle simple variable terms: x, 2x, x², 3x²
     let variableMatch = expr.match(/^(\d*)([a-z])(\^?\d+)?$/i);
     if (variableMatch) {
       const coeff = Number(variableMatch[1] || 1);
@@ -472,7 +498,7 @@ export class AlgebraSolver {
     }
     
     // If no pattern matches, return as single factor
-    console.log('No factorization pattern matched, returning as single factor:', [expr]);
+    console.log('Expression cannot be factored further:', [expr]);
     return [expr];
   }
 
@@ -543,27 +569,41 @@ export class AlgebraSolver {
   private static calculateAlgebraicLCM(factorizations: string[][]): string[] {
     console.log('Calculating LCM from factorizations:', factorizations);
     
-    const factorCounts = new Map<string, number>();
+    // Collect all unique factors with their maximum powers
+    const factorMap = new Map<string, number>();
     
-    // For each factorization, count occurrences of each factor
     factorizations.forEach(factors => {
-      const localCounts = new Map<string, number>();
+      // Count occurrences of each factor in this expression
+      const localFactorCounts = new Map<string, number>();
       
       factors.forEach(factor => {
-        const normalizedFactor = this.normalizeFactor(factor);
-        localCounts.set(normalizedFactor, (localCounts.get(normalizedFactor) || 0) + 1);
+        const normalized = this.normalizeFactor(factor);
+        localFactorCounts.set(normalized, (localFactorCounts.get(normalized) || 0) + 1);
       });
       
-      // Update global max counts
-      localCounts.forEach((count, factor) => {
-        const currentMax = factorCounts.get(factor) || 0;
-        factorCounts.set(factor, Math.max(currentMax, count));
+      // Update the global maximum for each factor
+      localFactorCounts.forEach((count, factor) => {
+        const currentMax = factorMap.get(factor) || 0;
+        factorMap.set(factor, Math.max(currentMax, count));
       });
     });
     
-    // Build LCM from factors with their maximum powers
+    // Build LCM by including each factor the maximum number of times it appears
     const lcmFactors: string[] = [];
-    factorCounts.forEach((count, factor) => {
+    
+    // Sort factors to ensure consistent output (numbers first, then variables)
+    const sortedFactors = Array.from(factorMap.keys()).sort((a, b) => {
+      const aIsNumber = /^\d+$/.test(a);
+      const bIsNumber = /^\d+$/.test(b);
+      
+      if (aIsNumber && !bIsNumber) return -1;
+      if (!aIsNumber && bIsNumber) return 1;
+      if (aIsNumber && bIsNumber) return Number(a) - Number(b);
+      return a.localeCompare(b);
+    });
+    
+    sortedFactors.forEach(factor => {
+      const count = factorMap.get(factor) || 0;
       for (let i = 0; i < count; i++) {
         lcmFactors.push(factor);
       }
