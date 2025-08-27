@@ -95,23 +95,30 @@ export class AlgebraSolver {
     }
 
     const expr = expressions[0];
-    const steps: string[] = [
-      `বীজগাণিতিক সূত্র প্রয়োগ: ${this.formatMathExpression(expr)}`,
-      ''
-    ];
+    const steps: string[] = [];
 
     const expanded = this.expandAlgebraicFormula(expr);
+    const compactForm = this.formatCompactMath(expr);
+    const expandedForm = this.formatCompactMath(expanded);
     
     if (expanded !== expr) {
-      steps.push(`সূত্র প্রয়োগ: ${this.formatMathExpression(expanded)}`);
-      
-      // Add formula explanation
+      // Add formula with compact notation
       if (expr.match(/\([^)]+\+[^)]+\)\^2|\([^)]+\+[^)]+\)²/)) {
-        steps.push('প্রয়োগকৃত সূত্র: (a+b)² = a² + 2ab + b²');
+        steps.push('সূত্র: (a+b)² = a² + 2ab + b²');
+        steps.push(`${compactForm} = ${expandedForm}`);
       } else if (expr.match(/\([^)]+\-[^)]+\)\^2|\([^)]+\-[^)]+\)²/)) {
-        steps.push('প্রয়োগকৃত সূত্র: (a-b)² = a² - 2ab + b²');
+        steps.push('সূত্র: (a-b)² = a² - 2ab + b²');
+        steps.push(`${compactForm} = ${expandedForm}`);
       } else if (expr.match(/\([^)]+\+[^)]+\+[^)]+\)\^2|\([^)]+\+[^)]+\+[^)]+\)²/)) {
-        steps.push('প্রয়োগকৃত সূত্র: (x+y+z)² = x² + y² + z² + 2xy + 2yz + 2zx');
+        steps.push('সূত্র: (x+y+z)² = x² + y² + z² + 2xy + 2yz + 2zx');
+        steps.push(`${compactForm} = ${expandedForm}`);
+      }
+      
+      // Check for difference of squares pattern
+      if (this.isDifferenceOfSquares(expr)) {
+        const result = this.solveDifferenceOfSquares(expr);
+        steps.push('সূত্র: (a-b)(a+b) = a² - b²');
+        steps.push(result);
       }
     } else {
       steps.push('(কোনো সূত্র প্রয়োগযোগ্য নয়)');
@@ -121,7 +128,7 @@ export class AlgebraSolver {
       type: 'algebraic_formula',
       variable: 'সূত্র',
       steps,
-      solution: `${this.formatMathExpression(expr)} = ${this.formatMathExpression(expanded)}`
+      solution: `${compactForm} = ${expandedForm}`
     };
   }
 
@@ -862,5 +869,37 @@ export class AlgebraSolver {
       }
     });
     return maxPower;
+  }
+
+  // Format mathematical expressions in compact form
+  private static formatCompactMath(expr: string): string {
+    return expr
+      .replace(/\^2/g, '²')
+      .replace(/\^3/g, '³')
+      .replace(/\^(\d)/g, (match, digit) => {
+        const superscripts = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+        return superscripts[parseInt(digit)];
+      })
+      .replace(/\*/g, '×')
+      .replace(/\s+/g, '');
+  }
+
+  // Check if expression is difference of squares pattern
+  private static isDifferenceOfSquares(expr: string): boolean {
+    return /\([^)]+\-[^)]+\)\([^)]+\+[^)]+\)/.test(expr) || 
+           /[a-z]²\s*-\s*\d+/.test(expr);
+  }
+
+  // Solve difference of squares: (a-b)(a+b) = a²-b²
+  private static solveDifferenceOfSquares(expr: string): string {
+    // Pattern: (x-a)(x+a) → x²-a²
+    const match = expr.match(/\(([^)]+)\-([^)]+)\)\(([^)]+)\+([^)]+)\)/);
+    if (match) {
+      const [, a1, b1, a2, b2] = match;
+      if (a1 === a2 && b1 === b2) {
+        return `${a1}² - ${b1}²`;
+      }
+    }
+    return expr;
   }
 }
