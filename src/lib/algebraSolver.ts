@@ -40,6 +40,12 @@ export class AlgebraSolver {
   static solve(problem: string): Solution {
     const trimmedProblem = problem.trim();
     
+    // Check for algebraic formulas (square of sum/difference patterns)
+    if (trimmedProblem.match(/expand|square|বর্গ|বিস্তার|formula|সূত্র/i) || 
+        trimmedProblem.match(/\([^)]+\)\^2|\([^)]+\)²/)) {
+      return this.solveAlgebraicFormula(trimmedProblem);
+    }
+    
     // Check for HCF problems
     if (trimmedProblem.match(/hcf|gcd|গসাগু|গ\.সা\.গু/i)) {
       return this.solveHCF(trimmedProblem);
@@ -78,6 +84,45 @@ export class AlgebraSolver {
 
     // Linear equation
     return this.solveLinear(left, right, trimmedProblem);
+  }
+
+  // New algebraic formula solver
+  private static solveAlgebraicFormula(problem: string): Solution {
+    const expressions = this.extractAlgebraicExpressions(problem);
+    
+    if (expressions.length === 0) {
+      throw new Error('কোনো বীজগাণিতিক রাশি খুঁজে পাওয়া যায়নি।');
+    }
+
+    const expr = expressions[0];
+    const steps: string[] = [
+      `বীজগাণিতিক সূত্র প্রয়োগ: ${this.formatMathExpression(expr)}`,
+      ''
+    ];
+
+    const expanded = this.expandAlgebraicFormula(expr);
+    
+    if (expanded !== expr) {
+      steps.push(`সূত্র প্রয়োগ: ${this.formatMathExpression(expanded)}`);
+      
+      // Add formula explanation
+      if (expr.match(/\([^)]+\+[^)]+\)\^2|\([^)]+\+[^)]+\)²/)) {
+        steps.push('প্রয়োগকৃত সূত্র: (a+b)² = a² + 2ab + b²');
+      } else if (expr.match(/\([^)]+\-[^)]+\)\^2|\([^)]+\-[^)]+\)²/)) {
+        steps.push('প্রয়োগকৃত সূত্র: (a-b)² = a² - 2ab + b²');
+      } else if (expr.match(/\([^)]+\+[^)]+\+[^)]+\)\^2|\([^)]+\+[^)]+\+[^)]+\)²/)) {
+        steps.push('প্রয়োগকৃত সূত্র: (x+y+z)² = x² + y² + z² + 2xy + 2yz + 2zx');
+      }
+    } else {
+      steps.push('(কোনো সূত্র প্রয়োগযোগ্য নয়)');
+    }
+
+    return {
+      type: 'algebraic_formula',
+      variable: 'সূত্র',
+      steps,
+      solution: `${this.formatMathExpression(expr)} = ${this.formatMathExpression(expanded)}`
+    };
   }
 
   // New factorization solver
@@ -166,6 +211,40 @@ export class AlgebraSolver {
         if (var1 === var2) return var1 + '²';
         return match;
       });
+  }
+
+  // Algebraic formula expander
+  private static expandAlgebraicFormula(expr: string): string {
+    // Remove spaces
+    expr = expr.replace(/\s/g, '');
+    
+    // Square of sum: (a+b)² = a² + 2ab + b²
+    let squareOfSum = expr.match(/\(([^)]+)\+([^)]+)\)\^2|\(([^)]+)\+([^)]+)\)²/);
+    if (squareOfSum) {
+      const a = squareOfSum[1] || squareOfSum[3];
+      const b = squareOfSum[2] || squareOfSum[4];
+      return `${a}² + 2×${a}×${b} + ${b}²`;
+    }
+    
+    // Square of difference: (a-b)² = a² - 2ab + b²
+    let squareOfDiff = expr.match(/\(([^)]+)\-([^)]+)\)\^2|\(([^)]+)\-([^)]+)\)²/);
+    if (squareOfDiff) {
+      const a = squareOfDiff[1] || squareOfDiff[3];
+      const b = squareOfDiff[2] || squareOfDiff[4];
+      return `${a}² - 2×${a}×${b} + ${b}²`;
+    }
+    
+    // Square of three terms: (x+y+z)² = x² + y² + z² + 2xy + 2yz + 2zx
+    let squareOfThree = expr.match(/\(([^)]+)\+([^)]+)\+([^)]+)\)\^2|\(([^)]+)\+([^)]+)\+([^)]+)\)²/);
+    if (squareOfThree) {
+      const x = squareOfThree[1] || squareOfThree[4];
+      const y = squareOfThree[2] || squareOfThree[5];
+      const z = squareOfThree[3] || squareOfThree[6];
+      return `${x}² + ${y}² + ${z}² + 2×${x}×${y} + 2×${y}×${z} + 2×${z}×${x}`;
+    }
+    
+    // If no pattern matches, return as is
+    return expr;
   }
 
   private static solveQuadratic(left: string, right: string): Solution {
