@@ -40,6 +40,23 @@ export class AlgebraSolver {
   static solve(problem: string): Solution {
     const trimmedProblem = problem.trim();
     
+    // Check for algebraic operations
+    if (trimmedProblem.match(/algebra\s*plus|বীজগাণিত\s*যোগ/i)) {
+      return this.solveAlgebraPlus(trimmedProblem);
+    }
+    
+    if (trimmedProblem.match(/algebra\s*minus|বীজগাণিত\s*বিয়োগ/i)) {
+      return this.solveAlgebraMinus(trimmedProblem);
+    }
+    
+    if (trimmedProblem.match(/algebra\s*multiply|বীজগাণিত\s*গুণ/i)) {
+      return this.solveAlgebraMultiply(trimmedProblem);
+    }
+    
+    if (trimmedProblem.match(/algebra\s*division|algebra\s*divide|বীজগাণিত\s*ভাগ/i)) {
+      return this.solveAlgebraDivision(trimmedProblem);
+    }
+    
     // Check for algebraic formulas (square of sum/difference patterns)
     if (trimmedProblem.match(/expand|square|বর্গ|বিস্তার|formula|সূত্র/i) || 
         trimmedProblem.match(/\([^)]+\)\^2|\([^)]+\)²/)) {
@@ -200,6 +217,355 @@ export class AlgebraSolver {
       steps,
       solution: `সরলীকৃত রূপ = ${simplified}`
     };
+  }
+
+  // New algebraic operation solvers
+  private static solveAlgebraPlus(problem: string): Solution {
+    const expressions = this.extractAlgebraicExpressions(problem);
+    
+    if (expressions.length < 2) {
+      throw new Error('দুটি বীজগাণিতিক রাশি প্রয়োজন যোগের জন্য।');
+    }
+
+    const expr1 = expressions[0];
+    const expr2 = expressions[1];
+    const steps: string[] = [
+      `বীজগাণিতিক যোগ: ${this.formatMathExpression(expr1)} + ${this.formatMathExpression(expr2)}`,
+      ''
+    ];
+
+    const result = this.addAlgebraicExpressions(expr1, expr2);
+    const formattedResult = this.formatMathExpression(result);
+
+    steps.push(`ধাপ ১: সদৃশ পদ একত্রিত করি`);
+    steps.push(`${this.formatMathExpression(expr1)} + ${this.formatMathExpression(expr2)} = ${formattedResult}`);
+
+    return {
+      type: 'algebra_plus',
+      variable: 'যোগফল',
+      steps,
+      solution: `যোগফল = ${formattedResult}`
+    };
+  }
+
+  private static solveAlgebraMinus(problem: string): Solution {
+    const expressions = this.extractAlgebraicExpressions(problem);
+    
+    if (expressions.length < 2) {
+      throw new Error('দুটি বীজগাণিতিক রাশি প্রয়োজন বিয়োগের জন্য।');
+    }
+
+    const expr1 = expressions[0];
+    const expr2 = expressions[1];
+    const steps: string[] = [
+      `বীজগাণিতিক বিয়োগ: ${this.formatMathExpression(expr1)} - ${this.formatMathExpression(expr2)}`,
+      ''
+    ];
+
+    const result = this.subtractAlgebraicExpressions(expr1, expr2);
+    const formattedResult = this.formatMathExpression(result);
+
+    steps.push(`ধাপ ১: দ্বিতীয় রাশির প্রতিটি পদের চিহ্ন পরিবর্তন করি`);
+    steps.push(`ধাপ ২: সদৃশ পদ একত্রিত করি`);
+    steps.push(`${this.formatMathExpression(expr1)} - ${this.formatMathExpression(expr2)} = ${formattedResult}`);
+
+    return {
+      type: 'algebra_minus',
+      variable: 'বিয়োগফল',
+      steps,
+      solution: `বিয়োগফল = ${formattedResult}`
+    };
+  }
+
+  private static solveAlgebraMultiply(problem: string): Solution {
+    const expressions = this.extractAlgebraicExpressions(problem);
+    
+    if (expressions.length < 2) {
+      throw new Error('দুটি বীজগাণিতিক রাশি প্রয়োজন গুণের জন্য।');
+    }
+
+    const expr1 = expressions[0];
+    const expr2 = expressions[1];
+    const steps: string[] = [
+      `বীজগাণিতিক গুণ: (${this.formatMathExpression(expr1)}) × (${this.formatMathExpression(expr2)})`,
+      ''
+    ];
+
+    const result = this.multiplyAlgebraicExpressions(expr1, expr2);
+    const formattedResult = this.formatMathExpression(result);
+
+    steps.push(`ধাপ ১: প্রতিটি পদকে প্রতিটি পদের সাথে গুণ করি`);
+    steps.push(`ধাপ ২: সদৃশ পদ একত্রিত করি`);
+    steps.push(`(${this.formatMathExpression(expr1)}) × (${this.formatMathExpression(expr2)}) = ${formattedResult}`);
+
+    return {
+      type: 'algebra_multiply',
+      variable: 'গুণফল',
+      steps,
+      solution: `গুণফল = ${formattedResult}`
+    };
+  }
+
+  private static solveAlgebraDivision(problem: string): Solution {
+    const expressions = this.extractAlgebraicExpressions(problem);
+    
+    if (expressions.length < 2) {
+      throw new Error('দুটি বীজগাণিতিক রাশি প্রয়োজন ভাগের জন্য।');
+    }
+
+    const expr1 = expressions[0];
+    const expr2 = expressions[1];
+    const steps: string[] = [
+      `বীজগাণিতিক ভাগ: (${this.formatMathExpression(expr1)}) ÷ (${this.formatMathExpression(expr2)})`,
+      ''
+    ];
+
+    const result = this.divideAlgebraicExpressions(expr1, expr2);
+    const formattedResult = this.formatMathExpression(result);
+
+    steps.push(`ধাপ ১: সাধারণ উৎপাদক বাদ করি`);
+    steps.push(`ধাপ ২: ভাগফল সরল করি`);
+    steps.push(`(${this.formatMathExpression(expr1)}) ÷ (${this.formatMathExpression(expr2)}) = ${formattedResult}`);
+
+    return {
+      type: 'algebra_division',
+      variable: 'ভাগফল',
+      steps,
+      solution: `ভাগফল = ${formattedResult}`
+    };
+  }
+
+  // Helper methods for algebraic operations
+  private static addAlgebraicExpressions(expr1: string, expr2: string): string {
+    // Simple implementation - combine like terms
+    const terms1 = this.parseTerms(expr1);
+    const terms2 = this.parseTerms(expr2);
+    
+    const combined = new Map<string, number>();
+    
+    // Add terms from first expression
+    terms1.forEach((coeff, term) => {
+      combined.set(term, (combined.get(term) || 0) + coeff);
+    });
+    
+    // Add terms from second expression
+    terms2.forEach((coeff, term) => {
+      combined.set(term, (combined.get(term) || 0) + coeff);
+    });
+    
+    return this.reconstructExpression(combined);
+  }
+
+  private static subtractAlgebraicExpressions(expr1: string, expr2: string): string {
+    const terms1 = this.parseTerms(expr1);
+    const terms2 = this.parseTerms(expr2);
+    
+    const combined = new Map<string, number>();
+    
+    // Add terms from first expression
+    terms1.forEach((coeff, term) => {
+      combined.set(term, (combined.get(term) || 0) + coeff);
+    });
+    
+    // Subtract terms from second expression
+    terms2.forEach((coeff, term) => {
+      combined.set(term, (combined.get(term) || 0) - coeff);
+    });
+    
+    return this.reconstructExpression(combined);
+  }
+
+  private static multiplyAlgebraicExpressions(expr1: string, expr2: string): string {
+    const terms1 = this.parseTerms(expr1);
+    const terms2 = this.parseTerms(expr2);
+    
+    const result = new Map<string, number>();
+    
+    terms1.forEach((coeff1, term1) => {
+      terms2.forEach((coeff2, term2) => {
+        const newCoeff = coeff1 * coeff2;
+        const newTerm = this.multiplyTerms(term1, term2);
+        result.set(newTerm, (result.get(newTerm) || 0) + newCoeff);
+      });
+    });
+    
+    return this.reconstructExpression(result);
+  }
+
+  private static divideAlgebraicExpressions(expr1: string, expr2: string): string {
+    // Simple division - mainly for monomial division
+    const terms1 = this.parseTerms(expr1);
+    const terms2 = this.parseTerms(expr2);
+    
+    if (terms2.size !== 1) {
+      return `(${expr1})/(${expr2})`; // Can't simplify polynomial division easily
+    }
+    
+    const [[divisorTerm, divisorCoeff]] = terms2.entries();
+    const result = new Map<string, number>();
+    
+    terms1.forEach((coeff, term) => {
+      const newCoeff = coeff / divisorCoeff;
+      const newTerm = this.divideTerms(term, divisorTerm);
+      if (newTerm !== null) {
+        result.set(newTerm, newCoeff);
+      }
+    });
+    
+    return result.size > 0 ? this.reconstructExpression(result) : `(${expr1})/(${expr2})`;
+  }
+
+  private static parseTerms(expr: string): Map<string, number> {
+    const terms = new Map<string, number>();
+    expr = expr.replace(/\s/g, '');
+    
+    // Split by + and - while keeping the signs
+    const termArray = expr.split(/(?=[+-])/).filter(Boolean);
+    
+    termArray.forEach(term => {
+      const match = term.match(/^([+-]?\d*)(.*)$/);
+      if (match) {
+        const coeffStr = match[1];
+        const variable = match[2] || '1';
+        
+        let coeff = 1;
+        if (coeffStr === '' || coeffStr === '+') coeff = 1;
+        else if (coeffStr === '-') coeff = -1;
+        else coeff = parseInt(coeffStr);
+        
+        const key = variable === '' ? '1' : variable;
+        terms.set(key, (terms.get(key) || 0) + coeff);
+      }
+    });
+    
+    return terms;
+  }
+
+  private static multiplyTerms(term1: string, term2: string): string {
+    if (term1 === '1') return term2;
+    if (term2 === '1') return term1;
+    
+    // Simple variable multiplication (x * x = x²)
+    const vars1 = this.extractVariables(term1);
+    const vars2 = this.extractVariables(term2);
+    
+    const combined = new Map<string, number>();
+    
+    vars1.forEach((power, variable) => {
+      combined.set(variable, (combined.get(variable) || 0) + power);
+    });
+    
+    vars2.forEach((power, variable) => {
+      combined.set(variable, (combined.get(variable) || 0) + power);
+    });
+    
+    return this.reconstructVariables(combined);
+  }
+
+  private static divideTerms(dividend: string, divisor: string): string | null {
+    if (divisor === '1') return dividend;
+    
+    const vars1 = this.extractVariables(dividend);
+    const vars2 = this.extractVariables(divisor);
+    
+    const result = new Map<string, number>();
+    
+    vars1.forEach((power, variable) => {
+      result.set(variable, power);
+    });
+    
+    vars2.forEach((power, variable) => {
+      const currentPower = result.get(variable) || 0;
+      const newPower = currentPower - power;
+      
+      if (newPower < 0) return null; // Can't divide
+      
+      if (newPower === 0) {
+        result.delete(variable);
+      } else {
+        result.set(variable, newPower);
+      }
+    });
+    
+    return this.reconstructVariables(result);
+  }
+
+  private static extractVariables(term: string): Map<string, number> {
+    const variables = new Map<string, number>();
+    
+    if (term === '1') return variables;
+    
+    // Match variables with optional powers: x, x², x^3, etc.
+    const matches = term.matchAll(/([a-z])(\^?(\d+)|²|³)?/gi);
+    
+    for (const match of matches) {
+      const variable = match[1];
+      let power = 1;
+      
+      if (match[2]) {
+        if (match[2] === '²') power = 2;
+        else if (match[2] === '³') power = 3;
+        else if (match[3]) power = parseInt(match[3]);
+      }
+      
+      variables.set(variable, (variables.get(variable) || 0) + power);
+    }
+    
+    return variables;
+  }
+
+  private static reconstructVariables(variables: Map<string, number>): string {
+    if (variables.size === 0) return '1';
+    
+    const parts: string[] = [];
+    
+    variables.forEach((power, variable) => {
+      if (power === 1) {
+        parts.push(variable);
+      } else if (power === 2) {
+        parts.push(variable + '²');
+      } else if (power === 3) {
+        parts.push(variable + '³');
+      } else {
+        parts.push(variable + '^' + power);
+      }
+    });
+    
+    return parts.join('');
+  }
+
+  private static reconstructExpression(terms: Map<string, number>): string {
+    const parts: string[] = [];
+    
+    terms.forEach((coeff, term) => {
+      if (coeff === 0) return;
+      
+      let termStr = '';
+      
+      if (term === '1') {
+        termStr = coeff.toString();
+      } else {
+        if (coeff === 1) {
+          termStr = term;
+        } else if (coeff === -1) {
+          termStr = '-' + term;
+        } else {
+          termStr = coeff + term;
+        }
+      }
+      
+      if (parts.length === 0) {
+        parts.push(termStr);
+      } else {
+        if (coeff > 0 && !termStr.startsWith('-')) {
+          parts.push('+' + termStr);
+        } else {
+          parts.push(termStr);
+        }
+      }
+    });
+    
+    return parts.length > 0 ? parts.join('') : '0';
   }
 
   // Enhanced expression simplifier
