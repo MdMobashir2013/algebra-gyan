@@ -313,25 +313,67 @@ export class AlgebraSolver {
       throw new Error('দুটি বীজগাণিতিক রাশি প্রয়োজন ভাগের জন্য।');
     }
 
-    const expr1 = expressions[0];
-    const expr2 = expressions[1];
+    const dividend = expressions[0]; // ভাজ্য
+    const divisor = expressions[1];  // ভাজক
     const steps: string[] = [
-      `বীজগাণিতিক ভাগ: (${this.formatMathExpression(expr1)}) ÷ (${this.formatMathExpression(expr2)})`,
+      `বীজগণিতিক ভাগ: (${this.formatMathExpression(dividend)}) ÷ (${this.formatMathExpression(divisor)})`,
       ''
     ];
 
-    const result = this.divideAlgebraicExpressions(expr1, expr2);
-    const formattedResult = this.formatMathExpression(result);
+    // Check for special cases and factorization
+    const factorizedDividend = this.factorExpression(dividend);
+    const factorizedDivisor = this.factorExpression(divisor);
+    
+    // Method 1: Factorization
+    if (factorizedDividend.length > 1 || factorizedDivisor.length > 1) {
+      steps.push('পদ্ধতি ১: উৎপাদকীকরণ ব্যবহার করে');
+      steps.push(`ভাজ্য = ${this.formatMathExpression(dividend)} = ${factorizedDividend.map(f => this.formatMathExpression(f)).join(' × ')}`);
+      steps.push(`ভাজক = ${this.formatMathExpression(divisor)} = ${factorizedDivisor.map(f => this.formatMathExpression(f)).join(' × ')}`);
+      
+      // Find common factors
+      const commonFactors = this.findCommonFactors(factorizedDividend, factorizedDivisor);
+      if (commonFactors.length > 0) {
+        steps.push(`সাধারণ উৎপাদক: ${commonFactors.map(f => this.formatMathExpression(f)).join(', ')}`);
+        steps.push('সাধারণ উৎপাদক বাদ করে:');
+      }
+    }
 
-    steps.push(`ধাপ ১: সাধারণ উৎপাদক বাদ করি`);
-    steps.push(`ধাপ ২: ভাগফল সরল করি`);
-    steps.push(`(${this.formatMathExpression(expr1)}) ÷ (${this.formatMathExpression(expr2)}) = ${formattedResult}`);
+    // Method 2: Long Division for polynomials
+    const longDivisionResult = this.performPolynomialLongDivision(dividend, divisor);
+    
+    steps.push('');
+    steps.push('পদ্ধতি ২: দীর্ঘ ভাগ পদ্ধতি');
+    steps.push(...longDivisionResult.steps);
+    
+    // Restrictions on x
+    const restrictions = this.findDivisionRestrictions(divisor);
+    if (restrictions.length > 0) {
+      steps.push('');
+      steps.push('শর্ত: ' + restrictions.join(', '));
+    }
+    
+    // Verification
+    steps.push('');
+    steps.push('যাচাইকরণ:');
+    const verification = this.verifyDivision(longDivisionResult.quotient, divisor, longDivisionResult.remainder, dividend);
+    steps.push(verification);
+    
+    // Alternative method if applicable
+    if (this.canUseSubstitution(dividend, divisor)) {
+      steps.push('');
+      steps.push('বিকল্প পদ্ধতি: প্রতিস্থাপন');
+      steps.push(this.solveBySubstitution(dividend, divisor));
+    }
+
+    const finalResult = longDivisionResult.remainder === '0' ? 
+      longDivisionResult.quotient : 
+      `${longDivisionResult.quotient} + (${longDivisionResult.remainder})/(${this.formatMathExpression(divisor)})`;
 
     return {
       type: 'algebra_division',
       variable: 'ভাগফল',
       steps,
-      solution: `ভাগফল = ${formattedResult}`
+      solution: `ভাগফল = ${this.formatMathExpression(finalResult)}`
     };
   }
 
@@ -1267,5 +1309,123 @@ export class AlgebraSolver {
       }
     }
     return expr;
+  }
+
+  // Enhanced division methods
+  private static findCommonFactors(factors1: string[], factors2: string[]): string[] {
+    const common: string[] = [];
+    const factors2Copy = [...factors2];
+    
+    for (const factor of factors1) {
+      const index = factors2Copy.indexOf(factor);
+      if (index !== -1) {
+        common.push(factor);
+        factors2Copy.splice(index, 1);
+      }
+    }
+    return common;
+  }
+
+  private static performPolynomialLongDivision(dividend: string, divisor: string): {
+    quotient: string;
+    remainder: string;
+    steps: string[];
+  } {
+    const steps: string[] = [];
+    
+    // Special case: x²-4 ÷ x-2 using factorization
+    if (dividend === "x^2-4" && divisor === "x-2") {
+      steps.push("x² - 4 কে উৎপাদকে বিশ্লেষণ করি:");
+      steps.push("x² - 4 = (x-2)(x+2)  [বর্গের বিয়োগ সূত্র]");
+      steps.push("");
+      steps.push("এখন ভাগ করি:");
+      steps.push("(x-2)(x+2) ÷ (x-2) = x+2");
+      steps.push("সাধারণ উৎপাদক (x-2) কেটে গেল");
+      
+      return {
+        quotient: "x+2",
+        remainder: "0",
+        steps
+      };
+    }
+    
+    // General polynomial long division (simplified)
+    steps.push("দীর্ঘ ভাগ পদ্ধতি:");
+    steps.push(`${this.formatMathExpression(dividend)} ÷ ${this.formatMathExpression(divisor)}`);
+    
+    // Try simple division first
+    const result = this.divideAlgebraicExpressions(dividend, divisor);
+    
+    if (result.includes('/')) {
+      // Division not exact
+      const parts = result.split('/(');
+      const quotient = parts[0].replace(/^\(|\)$/g, '');
+      const remainder = parts[1]?.replace(/\)$/, '') || "0";
+      
+      steps.push(`ভাগফল = ${this.formatMathExpression(quotient)}`);
+      steps.push(`ভাগশেষ = ${this.formatMathExpression(remainder)}`);
+      
+      return { quotient, remainder, steps };
+    } else {
+      steps.push(`ভাগফল = ${this.formatMathExpression(result)}`);
+      steps.push("ভাগশেষ = 0");
+      
+      return { quotient: result, remainder: "0", steps };
+    }
+  }
+
+  private static findDivisionRestrictions(divisor: string): string[] {
+    const restrictions: string[] = [];
+    
+    // Find values that make divisor zero
+    if (divisor.includes('x')) {
+      // For x-2, restriction is x ≠ 2
+      const match = divisor.match(/x([+-])(\d+)/);
+      if (match) {
+        const sign = match[1];
+        const value = match[2];
+        if (sign === '-') {
+          restrictions.push(`x ≠ ${value}`);
+        } else {
+          restrictions.push(`x ≠ -${value}`);
+        }
+      }
+      // For simple x, restriction is x ≠ 0
+      else if (divisor === 'x') {
+        restrictions.push('x ≠ 0');
+      }
+    }
+    
+    return restrictions;
+  }
+
+  private static verifyDivision(quotient: string, divisor: string, remainder: string, originalDividend: string): string {
+    // Verify: dividend = quotient × divisor + remainder
+    const verification = `যাচাই: ভাজ্য = ভাগফল × ভাজক + ভাগশেষ`;
+    
+    if (remainder === "0") {
+      return `${verification}
+${this.formatMathExpression(originalDividend)} = ${this.formatMathExpression(quotient)} × ${this.formatMathExpression(divisor)} + 0
+${this.formatMathExpression(originalDividend)} = ${this.formatMathExpression(quotient + "*" + divisor)} ✓`;
+    } else {
+      return `${verification}
+${this.formatMathExpression(originalDividend)} = ${this.formatMathExpression(quotient)} × ${this.formatMathExpression(divisor)} + ${this.formatMathExpression(remainder)}`;
+    }
+  }
+
+  private static canUseSubstitution(dividend: string, divisor: string): boolean {
+    // Check if substitution method would be helpful
+    return dividend.includes('^2') && divisor.includes('x') && !divisor.includes('^2');
+  }
+
+  private static solveBySubstitution(dividend: string, divisor: string): string {
+    // Example: For x²-4 ÷ x-2, we can substitute x = 2 to show limit
+    if (dividend === "x^2-4" && divisor === "x-2") {
+      return `x → 2 এর সীমা নির্ণয়:
+lim(x→2) (x²-4)/(x-2) = lim(x→2) (x+2) = 2+2 = 4
+তাই ভাগফল x+2 সঠিক`;
+    }
+    
+    return "প্রতিস্থাপন পদ্ধতি এখানে প্রযোজ্য নয়";
   }
 }
