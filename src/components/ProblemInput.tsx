@@ -27,10 +27,10 @@ export const ProblemInput = ({ problem, setProblem, onSolve, isLoading }: Proble
     { equation: "HCF x^2-4, x+2", description: "বীজগণিতিক গসাগু" },
     { equation: "LCM x-1, x^2-1", description: "বীজগণিতিক লসাগু" },
     { equation: "গসাগু 2x+4, 3x+6", description: "সরল রাশির গসাগু" },
-    { equation: "algebra plus 2x+3, x-1", description: "বীজগণিতিক যোগ" },
-    { equation: "algebra minus 3x+5, x+2", description: "বীজগণিতিক বিয়োগ" },
-    { equation: "algebra multiply x+2, x-3", description: "বীজগণিতিক গুণ" },
-    { equation: "algebra division x^2-4, x-2", description: "বীজগণিতিক ভাগ" },
+    { equation: "যোগ 2x+3, x-1", description: "বীজগণিতিক যোগ" },
+    { equation: "বিয়োগ 3x+5, x+2", description: "বীজগণিতিক বিয়োগ" },
+    { equation: "গুণ x+2, x-3", description: "বীজগণিতিক গুণ" },
+    { equation: "ভাগ x^2-4, x-2", description: "বীজগণিতিক ভাগ" },
   ];
 
   return (

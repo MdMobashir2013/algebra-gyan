@@ -41,19 +41,19 @@ export class AlgebraSolver {
     const trimmedProblem = problem.trim();
     
     // Check for algebraic operations
-    if (trimmedProblem.match(/algebra\s*plus|বীজগাণিত\s*যোগ/i)) {
+    if (trimmedProblem.match(/algebra\s*plus|বীজগাণিত\s*যোগ|^যোগ\s/i)) {
       return this.solveAlgebraPlus(trimmedProblem);
     }
     
-    if (trimmedProblem.match(/algebra\s*minus|বীজগাণিত\s*বিয়োগ/i)) {
+    if (trimmedProblem.match(/algebra\s*minus|বীজগাণিত\s*বিয়োগ|^বিয়োগ\s/i)) {
       return this.solveAlgebraMinus(trimmedProblem);
     }
     
-    if (trimmedProblem.match(/algebra\s*multiply|বীজগাণিত\s*গুণ/i)) {
+    if (trimmedProblem.match(/algebra\s*multiply|বীজগাণিত\s*গুণ|^গুণ\s/i)) {
       return this.solveAlgebraMultiply(trimmedProblem);
     }
     
-    if (trimmedProblem.match(/algebra\s*division|algebra\s*divide|বীজগাণিত\s*ভাগ/i)) {
+    if (trimmedProblem.match(/algebra\s*division|algebra\s*divide|বীজগাণিত\s*ভাগ|^ভাগ\s/i)) {
       return this.solveAlgebraDivision(trimmedProblem);
     }
     
