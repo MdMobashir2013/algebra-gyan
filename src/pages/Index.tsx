@@ -4,10 +4,12 @@ import { toast } from "sonner";
 import { AlgebraHero } from "@/components/AlgebraHero";
 import { ProblemInput } from "@/components/ProblemInput";
 import { SolutionDisplay } from "@/components/SolutionDisplay";
+import { AlgebraHistory } from "@/components/AlgebraHistory";
 import { AlgebraSolver } from "@/lib/algebraSolver";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Star, Users, Trophy, Zap, Heart, Facebook, Twitter, Instagram, Linkedin, Share2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Star, Users, Trophy, Zap, Heart, Facebook, Twitter, Instagram, Linkedin, Share2, Calculator, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Solution {
@@ -97,27 +99,46 @@ const Index = () => {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-16 max-w-6xl">
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Problem Input */}
-          <div className="space-y-6">
-            <ProblemInput 
-              problem={problem}
-              setProblem={setProblem}
-              onSolve={handleSolve}
-              isLoading={isLoading}
-            />
-          </div>
+        <Tabs defaultValue="solver" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-8">
+            <TabsTrigger value="solver" className="font-['Hind_Siliguri'] flex items-center gap-2">
+              <Calculator className="h-4 w-4" />
+              বীজগণিত সমাধানকারী
+            </TabsTrigger>
+            <TabsTrigger value="history" className="font-['Hind_Siliguri'] flex items-center gap-2">
+              <BookOpen className="h-4 w-4" />
+              বীজগণিতের ইতিহাস
+            </TabsTrigger>
+          </TabsList>
 
-          {/* Solution Display */}
-          <div className="space-y-6">
-            <SolutionDisplay 
-              problem={problem}
-              solution={solution}
-              isLoading={isLoading}
-              error={error}
-            />
-          </div>
-        </div>
+          <TabsContent value="solver" className="space-y-8">
+            <div className="grid lg:grid-cols-2 gap-8">
+              {/* Problem Input */}
+              <div className="space-y-6">
+                <ProblemInput 
+                  problem={problem}
+                  setProblem={setProblem}
+                  onSolve={handleSolve}
+                  isLoading={isLoading}
+                />
+              </div>
+
+              {/* Solution Display */}
+              <div className="space-y-6">
+                <SolutionDisplay 
+                  problem={problem}
+                  solution={solution}
+                  isLoading={isLoading}
+                  error={error}
+                />
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="history">
+            <AlgebraHistory />
+          </TabsContent>
+        </Tabs>
 
         {/* Features Section */}
         <motion.section 
