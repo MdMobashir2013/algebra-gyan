@@ -9,7 +9,8 @@ import { AlgebraSolver } from "@/lib/algebraSolver";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Star, Users, Trophy, Zap, Heart, Facebook, Twitter, Instagram, Linkedin, Share2, Calculator, BookOpen } from "lucide-react";
+import { Star, Users, Trophy, Zap, Heart, Facebook, Twitter, Instagram, Linkedin, Share2, Calculator, BookOpen, MessageCircle } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 interface Solution {
@@ -100,7 +101,7 @@ const Index = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-16 max-w-6xl">
         <Tabs defaultValue="solver" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8">
+          <TabsList className="grid w-full grid-cols-3 mb-8">
             <TabsTrigger value="solver" className="font-['Hind_Siliguri'] flex items-center gap-2">
               <Calculator className="h-4 w-4" />
               বীজগণিত সমাধানকারী
@@ -108,6 +109,10 @@ const Index = () => {
             <TabsTrigger value="history" className="font-['Hind_Siliguri'] flex items-center gap-2">
               <BookOpen className="h-4 w-4" />
               বীজগণিতের ইতিহাস
+            </TabsTrigger>
+            <TabsTrigger value="chatbot" className="font-['Hind_Siliguri'] flex items-center gap-2">
+              <MessageCircle className="h-4 w-4" />
+              এআই চ্যাটবট
             </TabsTrigger>
           </TabsList>
 
@@ -137,6 +142,65 @@ const Index = () => {
 
           <TabsContent value="history">
             <AlgebraHistory />
+          </TabsContent>
+
+          <TabsContent value="chatbot">
+            <div className="text-center py-12">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="max-w-2xl mx-auto"
+              >
+                <div className="p-6 bg-gradient-card rounded-xl border border-primary/20 shadow-soft mb-6">
+                  <MessageCircle className="h-16 w-16 text-primary mx-auto mb-4" />
+                  <h2 className="text-2xl font-bold text-primary font-['Hind_Siliguri'] mb-4">
+                    এআই চ্যাটবট (বেটা)
+                  </h2>
+                  <p className="text-muted-foreground font-['Hind_Siliguri'] mb-6 leading-relaxed">
+                    আমাদের বুদ্ধিমান চ্যাটবট আপনাকে বীজগণিত সমস্যা সমাধান, ব্যাখ্যা এবং ইতিহাস সম্পর্কে সাহায্য করবে। 
+                    ডাটাবেস থেকে বিস্তৃত তথ্য সহ তাৎক্ষণিক উত্তর পান।
+                  </p>
+                  <div className="flex flex-wrap gap-2 justify-center mb-6">
+                    <Badge variant="secondary" className="font-['Hind_Siliguri']">বেটা সংস্করণ</Badge>
+                    <Badge variant="outline" className="font-['Hind_Siliguri']">কাজ চলমান</Badge>
+                    <Badge variant="secondary" className="font-['Hind_Siliguri']">এআই চালিত</Badge>
+                  </div>
+                  <Button asChild size="lg" className="font-['Hind_Siliguri']">
+                    <Link to="/chatbot">
+                      <MessageCircle className="h-5 w-5 mr-2" />
+                      চ্যাটবট ব্যবহার করুন
+                    </Link>
+                  </Button>
+                </div>
+                
+                <div className="grid md:grid-cols-3 gap-4 text-sm">
+                  <div className="p-4 bg-white/50 rounded-lg border">
+                    <h4 className="font-semibold text-primary font-['Hind_Siliguri'] mb-2">
+                      🧮 সমস্যা সমাধান
+                    </h4>
+                    <p className="text-muted-foreground font-['Hind_Siliguri']">
+                      রৈখিক ও দ্বিঘাত সমীকরণ তাৎক্ষণিক সমাধান
+                    </p>
+                  </div>
+                  <div className="p-4 bg-white/50 rounded-lg border">
+                    <h4 className="font-semibold text-primary font-['Hind_Siliguri'] mb-2">
+                      📚 ব্যাখ্যা ও শিক্ষা
+                    </h4>
+                    <p className="text-muted-foreground font-['Hind_Siliguri']">
+                      বিস্তারিত ব্যাখ্যা ও ধাপে ধাপে শিক্ষা
+                    </p>
+                  </div>
+                  <div className="p-4 bg-white/50 rounded-lg border">
+                    <h4 className="font-semibold text-primary font-['Hind_Siliguri'] mb-2">
+                      🏛️ ইতিহাস ও তথ্য
+                    </h4>
+                    <p className="text-muted-foreground font-['Hind_Siliguri']">
+                      বীজগণিতের সমৃদ্ধ ইতিহাস ও তথ্য
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
           </TabsContent>
         </Tabs>
 
