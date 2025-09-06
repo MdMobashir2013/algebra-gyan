@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Bot, User, Brain, AlertTriangle, Sparkles, Database, History, Calculator } from "lucide-react";
+import { Send, Bot, User, Brain, AlertTriangle, Sparkles, Database, History, Calculator, BookOpen, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlgebraSolver } from "@/lib/algebraSolver";
+import { expandedAlgebraDatabase, searchDatabase, getRandomTopic, type AlgebraKnowledge } from "@/lib/expandedAlgebraDatabase";
 import { toast } from "sonner";
 
 interface ChatMessage {
@@ -18,18 +19,11 @@ interface ChatMessage {
   type?: 'solution' | 'explanation' | 'history' | 'general';
 }
 
-interface AlgebraKnowledge {
-  topic: string;
-  content: string;
-  examples: string[];
-  keywords: string[];
-}
-
 const AlgebraChatbot = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
-      content: 'আসসালামু আলাইকুম! আমি বীজগণিত জ্ঞানের এআই সহায়ক। আমি আপনাকে বীজগণিত সমস্যা সমাধান, ইতিহাস এবং ব্যাখ্যায় সাহায্য করতে পারি। কীভাবে সাহায্য করতে পারি?',
+      content: '**আসসালামু আলাইকুম!** 🌟\n\nআমি **বীজগণিত জ্ঞানের এআই সহায়ক**। আমি আপনাকে সাহায্য করতে পারি:\n\n• 🧮 **সমস্যা সমাধান** (রৈখিক, দ্বিঘাত, গুণনীয়করণ)\n• 📚 **ধারণা ব্যাখ্যা** (সূত্র, নিয়ম, পদ্ধতি)\n• 🏛️ **ইতিহাস** (আল-খোয়ারিজমি থেকে আধুনিক যুগ)\n• 🎯 **উদাহরণ ও অনুশীলন**\n\nকীভাবে সাহায্য করতে পারি?',
       sender: 'bot',
       timestamp: new Date(),
       type: 'general'
@@ -38,46 +32,6 @@ const AlgebraChatbot = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // Extensive algebra knowledge base
-  const algebraKnowledge: AlgebraKnowledge[] = [
-    {
-      topic: "রৈখিক সমীকরণ",
-      content: "রৈখিক সমীকরণ হল এমন সমীকরণ যেখানে চলরাশির সর্বোচ্চ ঘাত ১। যেমন: ax + b = 0",
-      examples: ["2x + 5 = 11", "3x - 7 = 8", "x/2 + 3 = 7"],
-      keywords: ["রৈখিক", "linear", "সমীকরণ", "equation", "ঘাত", "degree"]
-    },
-    {
-      topic: "দ্বিঘাত সমীকরণ",
-      content: "দ্বিঘাত সমীকরণ হল এমন সমীকরণ যেখানে চলরাশির সর্বোচ্চ ঘাত ২। সাধারণ রূপ: ax² + bx + c = 0",
-      examples: ["x² + 5x + 6 = 0", "2x² - 7x + 3 = 0", "x² - 4 = 0"],
-      keywords: ["দ্বিঘাত", "quadratic", "বর্গ", "square", "শ্রীধর", "discriminant"]
-    },
-    {
-      topic: "বীজগণিতের ইতিহাস",
-      content: "বীজগণিত শব্দটি এসেছে আরবি 'আল-জাবর' থেকে। আল-খোয়ারিজমি (৭৮০-৮৫০ খ্রি.) কে বীজগণিতের জনক বলা হয়।",
-      examples: ["আল-খোয়ারিজমির অবদান", "ব্রহ্মগুপ্তের কাজ", "আর্যভট্টের গণনা"],
-      keywords: ["ইতিহাস", "history", "আল-খোয়ারিজমি", "al-khwarizmi", "আরবি", "arabic"]
-    },
-    {
-      topic: "গুণনীয়করণ",
-      content: "গুণনীয়করণ হল একটি বহুপদকে দুই বা ততোধিক সরল গুণনীয়কের গুণফল হিসেবে প্রকাশ করা।",
-      examples: ["x² - 4 = (x+2)(x-2)", "x² + 5x + 6 = (x+2)(x+3)", "a² - b² = (a+b)(a-b)"],
-      keywords: ["গুণনীয়করণ", "factorization", "গুণনীয়ক", "factor", "বহুপদ", "polynomial"]
-    },
-    {
-      topic: "অনুপাত ও সমানুপাত",
-      content: "অনুপাত হল দুইটি রাশির তুলনা। a:b = c:d হলে এটি সমানুপাত, যেখানে a×d = b×c",
-      examples: ["3:4 = 6:8", "x:5 = 4:10", "2:3 = 8:12"],
-      keywords: ["অনুপাত", "ratio", "সমানুপাত", "proportion", "তুলনা", "comparison"]
-    },
-    {
-      topic: "বীজগণিতীয় সূত্র",
-      content: "প্রয়োজনীয় সূত্রসমূহ: (a+b)² = a² + 2ab + b², (a-b)² = a² - 2ab + b², a² - b² = (a+b)(a-b)",
-      examples: ["(x+3)² = x² + 6x + 9", "(2x-1)² = 4x² - 4x + 1", "x² - 9 = (x+3)(x-3)"],
-      keywords: ["সূত্র", "formula", "বর্গ", "square", "ঘন", "cube", "বিস্তৃতি", "expansion"]
-    }
-  ];
 
   const handleSendMessage = async () => {
     if (!input.trim()) return;
@@ -117,50 +71,63 @@ const AlgebraChatbot = () => {
       try {
         const solution = AlgebraSolver.solve(userInput);
         return {
-          content: `🔍 **সমাধান:**\n\n**সমস্যা:** ${userInput}\n\n**ধাপসমূহ:**\n${solution.steps.join('\n')}\n\n**উত্তর:** ${solution.solution}\n\n**ব্যাখ্যা:** এটি একটি ${solution.type} সমস্যা যেখানে আমরা ${solution.variable} এর মান বের করেছি।`,
+          content: `🔍 **সমাধান:**\n\n**সমস্যা:** \`${userInput}\`\n\n**ধাপসমূহ:**\n${solution.steps.map(step => `• ${step}`).join('\n')}\n\n**✅ উত্তর:** \`${solution.solution}\`\n\n**📝 ব্যাখ্যা:** এটি একটি **${solution.type}** সমস্যা যেখানে আমরা **${solution.variable}** এর মান বের করেছি।\n\n*আরো সমস্যা সমাধান করতে চান?*`,
           type: 'solution'
         };
       } catch (error) {
         return {
-          content: `দুঃখিত, এই সমস্যাটি সমাধান করতে সমস্যা হয়েছে। অনুগ্রহ করে সমস্যাটি সঠিক ফরম্যাটে লিখুন। উদাহরণ: "x + 5 = 10" বা "2x² - 8 = 0"`,
+          content: `❌ **দুঃখিত!** এই সমস্যাটি সমাধান করতে সমস্যা হয়েছে।\n\n**💡 সঠিক ফরম্যাট:**\n• \`x + 5 = 10\`\n• \`2x² - 8 = 0\`\n• \`3x - 7 = 14\`\n\n*আবার চেষ্টা করুন!*`,
           type: 'general'
         };
       }
     }
 
-    // Search through knowledge base
-    for (const knowledge of algebraKnowledge) {
-      const found = knowledge.keywords.some(keyword => 
-        input.includes(keyword.toLowerCase())
-      );
+    // Search through expanded knowledge base
+    const searchResults = searchDatabase(input);
+    if (searchResults.length > 0) {
+      const knowledge = searchResults[0]; // Get the best match
+      const examples = knowledge.examples.map(ex => `• \`${ex}\``).join('\n');
+      const difficultyEmoji = '⭐'.repeat(knowledge.difficulty);
       
-      if (found) {
-        const examples = knowledge.examples.join('\n• ');
-        return {
-          content: `📚 **${knowledge.topic}**\n\n${knowledge.content}\n\n**উদাহরণসমূহ:**\n• ${examples}\n\nআরো কিছু জানতে চান?`,
-          type: 'explanation'
-        };
-      }
+      return {
+        content: `📚 **${knowledge.topic}** ${difficultyEmoji}\n\n${knowledge.content}\n\n**📖 উদাহরণসমূহ:**\n${examples}\n\n*আরো জানতে চান বা অন্য কিছু?*`,
+        type: 'explanation'
+      };
     }
 
-    // History-related responses
-    if (input.includes('ইতিহাস') || input.includes('history') || input.includes('কে আবিষ্কার')) {
+    // History-related responses with more detail
+    if (input.includes('ইতিহাস') || input.includes('history') || input.includes('কে আবিষ্কার') || input.includes('আবিষ্কার')) {
+      const historyTopics = expandedAlgebraDatabase.filter(item => item.category === 'history');
+      const randomHistory = historyTopics[Math.floor(Math.random() * historyTopics.length)];
+      
       return {
-        content: `🏛️ **বীজগণিতের ইতিহাস**\n\n• **আল-খোয়ারিজমি (৭৮০-৮৫০):** বীজগণিতের জনক\n• **ব্রহ্মগুপ্ত (৬২৮-৬৬৮):** শূন্যের ব্যবহার\n• **আর্যভট্ট (৪৭৬-৫৫০):** ভারতীয় গণিতবিদ\n• **আল-জাবর:** বীজগণিত শব্দের উৎস (আরবি)\n\nবিস্তারিত জানতে "ইতিহাস" ট্যাবে যান!`,
+        content: `🏛️ **বীজগণিতের ইতিহাস**\n\n${randomHistory.content}\n\n**🌟 মূল ব্যক্তিত্বগণ:**\n• **আল-খোয়ারিজমি (৭৮০-৮৫০):** বীজগণিতের জনক\n• **ব্রহ্মগুপ্ত (৬২৮-৬৬৮):** শূন্যের ব্যবহার\n• **আর্যভট্ট (৪৭৬-৫৫০):** ভারতীয় গণিতবিদ\n• **ভিয়েত (১৫৪০-১৬০৩):** প্রতীকী বীজগণিত\n\n*বিস্তারিত জানতে "ইতিহাস" ট্যাবে যান!*`,
         type: 'history'
       };
     }
 
-    // Default responses
-    const defaultResponses = [
-      "দুর্দান্ত প্রশ্ন! আমি আপনাকে বীজগণিত সমস্যা সমাধান, সূত্র এবং ব্যাখ্যায় সাহায্য করতে পারি। একটি সমীকরণ দিন বা কোন টপিক সম্পর্কে জানতে চান বলুন।",
-      "আমি এখানে আছি সাহায্য করার জন্য! রৈখিক সমীকরণ, দ্বিঘাত সমীকরণ, গুণনীয়করণ - যেকোনো বিষয়ে প্রশ্ন করুন।",
-      "বীজগণিত নিয়ে কোন সমস্যায় আছেন? আমি ধাপে ধাপে সমাধান ও ব্যাখ্যা দিতে পারি।",
-      "কী জানতে চান? সমীকরণ সমাধান, সূত্র, নাকি বীজগণিতের ইতিহাস?"
+    // Random topic suggestion
+    if (input.includes('কিছু') || input.includes('শেখা') || input.includes('জান') || input.includes('help')) {
+      const randomTopic = getRandomTopic();
+      return {
+        content: `💡 **আজ কী শিখবেন?**\n\n**${randomTopic.topic}**\n\n${randomTopic.content.substring(0, 200)}...\n\n**🎯 বিষয়ক ক্যাটাগরিসমূহ:**\n• 🟢 **মূলভিত্তিক:** রৈখিক সমীকরণ, গুণনীয়করণ\n• 🟡 **মধ্যম:** দ্বিঘাত সমীকরণ, অসমতা\n• 🔴 **উচ্চপর্যায়:** জটিল সংখ্যা, গ্রুপ তত্ত্ব\n• 📜 **ইতিহাস:** প্রাচীনকাল থেকে আধুনিক যুগ\n\n*কোন বিষয়ে আগ্রহী?*`,
+        type: 'general'
+      };
+    }
+
+    // Enhanced default responses
+    const enhancedResponses = [
+      `🌟 **দুর্দান্ত প্রশ্ন!** আমি আপনাকে বীজগণিত সমস্যা সমাধান, সূত্র এবং ব্যাখ্যায় সাহায্য করতে পারি।\n\n**💫 উদাহরণ প্রশ্ন:**\n• "২x + ৫ = ১১ সমাধান করো"\n• "দ্বিঘাত সমীকরণ কী?"\n• "গুণনীয়করণ শেখাও"\n\n*কী জানতে চান?*`,
+      
+      `🚀 **আমি এখানে আছি সাহায্য করার জন্য!**\n\n**📚 আমার বিশেষত্ব:**\n• ✅ রৈখিক ও দ্বিঘাত সমীকরণ\n• ✅ গুণনীয়করণ ও সূত্রাবলী\n• ✅ বীজগণিতের ইতিহাস\n• ✅ ধাপে ধাপে সমাধান\n\n*যেকোনো বিষয়ে প্রশ্ন করুন!*`,
+      
+      `🎯 **বীজগণিত নিয়ে কোন সমস্যায় আছেন?**\n\nআমি আপনাকে দিতে পারি:\n• 🔍 **বিস্তারিত সমাধান**\n• 📖 **সহজ ব্যাখ্যা**\n• 🏆 **অনুশীলনী**\n• 📈 **পরবর্তী ধাপ**\n\n*একটি সমীকরণ দিন বা টপিক বলুন!*`,
+      
+      `🤔 **কী জানতে চান?**\n\n**🔥 জনপ্রিয় বিষয়:**\n• সমীকরণ সমাধান\n• বীজগণিতীয় সূত্র\n• গুণনীয়করণ পদ্ধতি\n• বীজগণিতের ইতিহাস\n\n**💡 টিপস:** স্পেসিফিক প্রশ্ন করলে আরো ভালো সাহায্য পাবেন!\n\n*আপনার প্রশ্ন কী?*`
     ];
 
     return {
-      content: defaultResponses[Math.floor(Math.random() * defaultResponses.length)],
+      content: enhancedResponses[Math.floor(Math.random() * enhancedResponses.length)],
       type: 'general'
     };
   };
@@ -258,8 +225,18 @@ const AlgebraChatbot = () => {
                                   : 'bg-white border shadow-sm'
                               }`}
                             >
-                              <div className="whitespace-pre-wrap font-['Hind_Siliguri']">
-                                {message.content}
+                              <div className="whitespace-pre-wrap font-['Hind_Siliguri'] leading-relaxed">
+                                {message.content.split('**').map((part, index) => {
+                                  if (index % 2 === 1) {
+                                    return <strong key={index} className="font-bold text-primary">{part}</strong>;
+                                  }
+                                  return part.split('`').map((codePart, codeIndex) => {
+                                    if (codeIndex % 2 === 1) {
+                                      return <code key={codeIndex} className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono">{codePart}</code>;
+                                    }
+                                    return codePart;
+                                  }).join('');
+                                }).join('')}
                               </div>
                               {message.type && message.sender === 'bot' && (
                                 <div className="flex items-center gap-1 mt-2 opacity-70">
@@ -345,30 +322,60 @@ const AlgebraChatbot = () => {
       {/* Quick Actions */}
       <div className="container mx-auto px-4 pb-8 max-w-4xl">
         <div className="text-center mb-4">
-          <h3 className="text-lg font-semibold text-primary font-['Hind_Siliguri'] mb-2">
-            দ্রুত শুরু করুন
-          </h3>
+          <h3 className="text-lg font-semibold text-primary font-['Hind_Siliguri'] mb-2">🚀 দ্রুত শুরু করুন</h3>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {[
-            { text: "x + 5 = 10", desc: "রৈখিক সমীকরণ" },
-            { text: "x² - 4 = 0", desc: "দ্বিঘাত সমীকরণ" },
-            { text: "বীজগণিতের ইতিহাস", desc: "ইতিহাস জানুন" },
-            { text: "গুণনীয়করণ কী?", desc: "ব্যাখ্যা পান" }
-          ].map((item, index) => (
-            <Button
-              key={index}
-              variant="outline"
-              size="sm"
-              className="h-auto p-3 text-left font-['Hind_Siliguri']"
-              onClick={() => setInput(item.text)}
-            >
-              <div>
-                <div className="font-medium text-sm">{item.text}</div>
-                <div className="text-xs text-muted-foreground">{item.desc}</div>
-              </div>
-            </Button>
-          ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          <Button
+            variant="outline"
+            className="p-4 h-auto flex flex-col items-start text-left font-['Hind_Siliguri'] hover:bg-primary/5 border-primary/20"
+            onClick={() => setInput("2x + 5 = 15 সমাধান করো")}
+          >
+            <Calculator className="h-5 w-5 mb-2 text-primary" />
+            <div className="font-semibold text-sm">🧮 রৈখিক সমীকরণ</div>
+            <div className="text-xs text-muted-foreground">2x + 5 = 15 সমাধান</div>
+          </Button>
+          
+          <Button
+            variant="outline"
+            className="p-4 h-auto flex flex-col items-start text-left font-['Hind_Siliguri'] hover:bg-primary/5 border-primary/20"
+            onClick={() => setInput("x² + 3x + 2 = 0 সমাধান করো")}
+          >
+            <Sparkles className="h-5 w-5 mb-2 text-primary" />
+            <div className="font-semibold text-sm">📐 দ্বিঘাত সমীকরণ</div>
+            <div className="text-xs text-muted-foreground">x² + 3x + 2 = 0</div>
+          </Button>
+          
+          <Button
+            variant="outline"
+            className="p-4 h-auto flex flex-col items-start text-left font-['Hind_Siliguri'] hover:bg-primary/5 border-primary/20"
+            onClick={() => setInput("গুণনীয়করণ কী?")}
+          >
+            <BookOpen className="h-5 w-5 mb-2 text-primary" />
+            <div className="font-semibold text-sm">🔢 গুণনীয়করণ</div>
+            <div className="text-xs text-muted-foreground">ধারণা ও পদ্ধতি</div>
+          </Button>
+          
+          <Button
+            variant="outline"
+            className="p-4 h-auto flex flex-col items-start text-left font-['Hind_Siliguri'] hover:bg-primary/5 border-primary/20"
+            onClick={() => setInput("বীজগণিতের ইতিহাস বলো")}
+          >
+            <History className="h-5 w-5 mb-2 text-primary" />
+            <div className="font-semibold text-sm">🏛️ ইতিহাস</div>
+            <div className="text-xs text-muted-foreground">আল-খোয়ারিজমি থেকে আজ</div>
+          </Button>
+        </div>
+        
+        {/* Database Info */}
+        <div className="mt-6 text-center">
+          <Card className="p-4 bg-gradient-to-r from-primary/5 to-secondary/5 border-primary/20">
+            <div className="flex items-center justify-center gap-3 text-sm text-muted-foreground font-['Hind_Siliguri']">
+              <Database className="h-4 w-4 text-primary" />
+              <span>📊 **{expandedAlgebraDatabase.length}+** টি বিষয় ডাটাবেসে সংরক্ষিত</span>
+              <Lightbulb className="h-4 w-4 text-primary" />
+              <span>🤖 এআই চালিত স্মার্ট রেসপন্স</span>
+            </div>
+          </Card>
         </div>
       </div>
     </div>
