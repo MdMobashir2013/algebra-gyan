@@ -373,7 +373,7 @@ const AlgebraChatbot = () => {
           <Card className="p-4 bg-gradient-to-r from-primary/5 to-secondary/5 border-primary/20">
             <div className="flex items-center justify-center gap-3 text-sm text-muted-foreground font-['Hind_Siliguri']">
               <Database className="h-4 w-4 text-primary" />
-              <span>📊 **{expandedAlgebraDatabase.length}+** টি বিষয় ডাটাবেসে সংরক্ষিত</span>
+              <span>📊 <strong className="font-bold text-primary">{expandedAlgebraDatabase.length}+</strong> টি বিষয় ডাটাবেসে সংরক্ষিত</span>
               <Lightbulb className="h-4 w-4 text-primary" />
               <span>🤖 এআই চালিত স্মার্ট রেসপন্স</span>
             </div>
