@@ -230,13 +230,15 @@ const AlgebraChatbot = () => {
                                   if (index % 2 === 1) {
                                     return <strong key={index} className="font-bold text-primary">{part}</strong>;
                                   }
-                                  return part.split('`').map((codePart, codeIndex) => {
+                                  // Handle code formatting
+                                  const codeSegments = part.split('`');
+                                  return codeSegments.map((codePart, codeIndex) => {
                                     if (codeIndex % 2 === 1) {
-                                      return <code key={codeIndex} className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono">{codePart}</code>;
+                                      return <code key={`${index}-${codeIndex}`} className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono">{codePart}</code>;
                                     }
-                                    return codePart;
-                                  }).join('');
-                                }).join('')}
+                                    return <span key={`${index}-${codeIndex}`}>{codePart}</span>;
+                                  });
+                                })}
                               </div>
                               {message.type && message.sender === 'bot' && (
                                 <div className="flex items-center gap-1 mt-2 opacity-70">
