@@ -66,6 +66,30 @@ const AlgebraChatbot = () => {
   const generateBotResponse = (userInput: string): { content: string; type: ChatMessage['type'] } => {
     const input = userInput.toLowerCase();
 
+    // Enhanced definition and concept queries
+    if (input.includes('কী') || input.includes('কি') || input.includes('what is') || input.includes('define') || 
+        input.includes('সংজ্ঞা') || input.includes('অর্থ') || input.includes('meaning')) {
+      const searchResults = searchDatabase(input);
+      if (searchResults.length > 0) {
+        const knowledge = searchResults[0];
+        const examples = knowledge.examples.map(ex => `• \`${ex}\``).join('\n');
+        const difficultyLevel = ['নতুন শিক্ষার্থী', 'মধ্যম', 'উন্নত', 'উচ্চতর', 'বিশেষজ্ঞ'][knowledge.difficulty - 1];
+        
+        return {
+          content: `📖 **${knowledge.topic} - সংজ্ঞা ও ব্যাখ্যা**\n\n${knowledge.content}\n\n**📝 উদাহরণসমূহ:**\n${examples}\n\n**🎯 কঠিনতার স্তর:** ${difficultyLevel}\n**📂 বিভাগ:** ${knowledge.category === 'basic' ? 'মৌলিক' : knowledge.category === 'intermediate' ? 'মধ্যম' : knowledge.category === 'advanced' ? 'উন্নত' : knowledge.category === 'history' ? 'ইতিহাস' : 'সূত্র'}\n\n*আরো বিস্তারিত জানতে চান?*`,
+          type: 'explanation'
+        };
+      }
+    }
+
+    // Function-related queries
+    if (input.includes('ফাংশন') || input.includes('function') || input.includes('f(x)')) {
+      return {
+        content: `🔢 **ফাংশন সম্পর্কে বিস্তারিত:**\n\n**ফাংশন কী?** একটি নিয়ম যা প্রতিটি ইনপুট এর জন্য ঠিক একটি আউটপুট দেয়।\n\n**প্রকারভেদ:**\n• **রৈখিক:** f(x) = ax + b\n• **দ্বিঘাত:** f(x) = ax² + bx + c\n• **ঘনক:** f(x) = ax³ + bx² + cx + d\n• **মূলদ:** f(x) = P(x)/Q(x)\n\n**গুরুত্বপূর্ণ ধারণা:**\n• **ডোমেইন:** ইনপুট মানের সেট\n• **রেঞ্জ:** আউটপুট মানের সেট\n• **একৈক ফাংশন:** প্রতিটি y এর জন্য একটি x\n• **বিপরীত ফাংশন:** f⁻¹(x)\n\n**📖 উদাহরণ:** f(x) = 2x + 3 হলে f(5) = 13\n\n*কোন ধরনের ফাংশন নিয়ে জানতে চান?*`,
+        type: 'explanation'
+      };
+    }
+
     // Check if it's a math problem that needs solving
     if (input.includes('=') || input.includes('সমাধান') || input.includes('solve')) {
       try {
@@ -82,15 +106,22 @@ const AlgebraChatbot = () => {
       }
     }
 
-    // Search through expanded knowledge base
+    // Search through expanded knowledge base with better matching
     const searchResults = searchDatabase(input);
     if (searchResults.length > 0) {
       const knowledge = searchResults[0]; // Get the best match
       const examples = knowledge.examples.map(ex => `• \`${ex}\``).join('\n');
       const difficultyEmoji = '⭐'.repeat(knowledge.difficulty);
+      const categoryName = {
+        'basic': 'মৌলিক',
+        'intermediate': 'মধ্যম',
+        'advanced': 'উন্নত',
+        'history': 'ইতিহাস',
+        'formula': 'সূত্র'
+      }[knowledge.category] || knowledge.category;
       
       return {
-        content: `📚 **${knowledge.topic}** ${difficultyEmoji}\n\n${knowledge.content}\n\n**📖 উদাহরণসমূহ:**\n${examples}\n\n*আরো জানতে চান বা অন্য কিছু?*`,
+        content: `📚 **${knowledge.topic}** ${difficultyEmoji}\n\n${knowledge.content}\n\n**📖 উদাহরণসমূহ:**\n${examples}\n\n**📂 বিভাগ:** ${categoryName}\n\n*আরো জানতে চান বা অন্য কিছু?*`,
         type: 'explanation'
       };
     }

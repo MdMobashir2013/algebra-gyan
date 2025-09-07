@@ -9,7 +9,7 @@ import { AlgebraSolver } from "@/lib/algebraSolver";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Star, Users, Trophy, Zap, Heart, Facebook, Twitter, Instagram, Linkedin, Share2, Calculator, BookOpen, MessageCircle } from "lucide-react";
+import { Star, Users, Trophy, Zap, Heart, Facebook, Twitter, Instagram, Linkedin, Share2, Calculator, BookOpen, MessageCircle, Grid3X3 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
@@ -101,10 +101,14 @@ const Index = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-16 max-w-6xl">
         <Tabs defaultValue="solver" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsList className="grid w-full grid-cols-4 mb-8">
             <TabsTrigger value="solver" className="font-['Hind_Siliguri'] flex items-center gap-2">
               <Calculator className="h-4 w-4" />
               বীজগণিত সমাধানকারী
+            </TabsTrigger>
+            <TabsTrigger value="matrix" className="font-['Hind_Siliguri'] flex items-center gap-2">
+              <Grid3X3 className="h-4 w-4" />
+              ম্যাট্রিক্স সলভার
             </TabsTrigger>
             <TabsTrigger value="history" className="font-['Hind_Siliguri'] flex items-center gap-2">
               <BookOpen className="h-4 w-4" />
@@ -137,6 +141,65 @@ const Index = () => {
                   error={error}
                 />
               </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="matrix">
+            <div className="text-center py-12">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="max-w-2xl mx-auto"
+              >
+                <div className="p-6 bg-gradient-card rounded-xl border border-primary/20 shadow-soft mb-6">
+                  <Grid3X3 className="h-16 w-16 text-primary mx-auto mb-4" />
+                  <h2 className="text-2xl font-bold text-primary font-['Hind_Siliguri'] mb-4">
+                    ম্যাট্রিক্স সলভার
+                  </h2>
+                  <p className="text-muted-foreground font-['Hind_Siliguri'] mb-6 leading-relaxed">
+                    ম্যাট্রিক্সের যোগ, বিয়োগ, গুণ, নির্ণায়ক এবং বিপরীত ম্যাট্রিক্স গণনা করুন। 
+                    ইন্টারঅ্যাক্টিভ ক্যালকুলেটর সহ তত্ত্বও শিখুন।
+                  </p>
+                  <div className="flex flex-wrap gap-2 justify-center mb-6">
+                    <Badge variant="secondary" className="font-['Hind_Siliguri']">ইন্টারঅ্যাক্টিভ</Badge>
+                    <Badge variant="outline" className="font-['Hind_Siliguri']">উন্নত গণিত</Badge>
+                    <Badge variant="secondary" className="font-['Hind_Siliguri']">তত্ত্ব সহ</Badge>
+                  </div>
+                  <Button asChild size="lg" className="font-['Hind_Siliguri']">
+                    <Link to="/matrix">
+                      <Grid3X3 className="h-5 w-5 mr-2" />
+                      ম্যাট্রিক্স সলভার ব্যবহার করুন
+                    </Link>
+                  </Button>
+                </div>
+                
+                <div className="grid md:grid-cols-3 gap-4 text-sm">
+                  <div className="p-4 bg-white/50 rounded-lg border">
+                    <h4 className="font-semibold text-primary font-['Hind_Siliguri'] mb-2">
+                      🧮 মৌলিক ক্রিয়া
+                    </h4>
+                    <p className="text-muted-foreground font-['Hind_Siliguri']">
+                      যোগ, বিয়োগ, গুণ - সব ধরনের ম্যাট্রিক্স অপারেশন
+                    </p>
+                  </div>
+                  <div className="p-4 bg-white/50 rounded-lg border">
+                    <h4 className="font-semibold text-primary font-['Hind_Siliguri'] mb-2">
+                      🔢 নির্ণায়ক ও বিপরীত
+                    </h4>
+                    <p className="text-muted-foreground font-['Hind_Siliguri']">
+                      নির্ণায়ক ও বিপরীত ম্যাট্রিক্স গণনা
+                    </p>
+                  </div>
+                  <div className="p-4 bg-white/50 rounded-lg border">
+                    <h4 className="font-semibold text-primary font-['Hind_Siliguri'] mb-2">
+                      📚 তত্ত্ব ও ব্যাখ্যা
+                    </h4>
+                    <p className="text-muted-foreground font-['Hind_Siliguri']">
+                      ম্যাট্রিক্স তত্ত্ব ও ব্যবহারিক প্রয়োগ
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
             </div>
           </TabsContent>
 

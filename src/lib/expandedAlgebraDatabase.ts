@@ -146,6 +146,97 @@ export const expandedAlgebraDatabase: AlgebraKnowledge[] = [
     keywords: ["রিং", "ring", "ফিল্ড", "field", "কমিউটেটিভ", "commutative"],
     category: 'advanced',
     difficulty: 5
+  },
+
+  // More definitions and concepts
+  {
+    topic: "বীজগণিত কী?",
+    content: "**বীজগণিত (Algebra)** হল গণিতের একটি শাখা যা সংখ্যা, চলরাশি এবং প্রতীক নিয়ে কাজ করে।\n\n**বীজগণিতের মূল উপাদান:**\n- **চলরাশি (Variable):** x, y, z ইত্যাদি অজানা মান\n- **ধ্রুবক (Constant):** নির্দিষ্ট মান যেমন 5, 10\n- **গুণাঙ্ক (Coefficient):** চলরাশির সাথে যুক্ত সংখ্যা\n- **পদ (Term):** চলরাশি ও ধ্রুবকের একক অংশ\n\n**বীজগণিতের ব্যবহার:** ইঞ্জিনিয়ারিং, পদার্থবিজ্ঞান, অর্থনীতি, কম্পিউটার সায়েন্স",
+    examples: ["3x + 5 = 14", "2x² - 7x + 3", "a + b = c"],
+    keywords: ["বীজগণিত", "algebra", "সংজ্ঞা", "definition", "চলরাশি", "variable", "ধ্রুবক"],
+    category: 'basic',
+    difficulty: 1
+  },
+
+  {
+    topic: "চলরাশি ও ধ্রুবক",
+    content: "**চলরাশি (Variable):** এমন প্রতীক যার মান পরিবর্তনশীল। সাধারণত x, y, z দিয়ে প্রকাশ করা হয়।\n\n**ধ্রুবক (Constant):** নির্দিষ্ট ও অপরিবর্তনীয় মান।\n\n**গুণাঙ্ক (Coefficient):** চলরাশির সাথে যুক্ত সংখ্যা।\n\n**উদাহরণ:** 5x + 3 তে\n- x = চলরাশি\n- 5 = গুণাঙ্ক\n- 3 = ধ্রুবক পদ",
+    examples: ["x, y, z (চলরাশি)", "5, 10, π (ধ্রুবক)", "3x তে 3 হল গুণাঙ্ক"],
+    keywords: ["চলরাশি", "variable", "ধ্রুবক", "constant", "গুণাঙ্ক", "coefficient"],
+    category: 'basic',
+    difficulty: 1
+  },
+
+  {
+    topic: "সমীকরণ ও অভেদ",
+    content: "**সমীকরণ (Equation):** দুইটি বীজগণিতীয় রাশির সমতা যা নির্দিষ্ট মানের জন্য সত্য।\n\n**অভেদ (Identity):** সমতা যা চলরাশির সকল মানের জন্য সত্য।\n\n**পার্থক্য:**\n- সমীকরণ: x + 2 = 5 (শুধু x = 3 এর জন্য সত্য)\n- অভেদ: (a + b)² ≡ a² + 2ab + b² (সব মানের জন্য সত্য)",
+    examples: ["2x + 1 = 7 (সমীকরণ)", "(x + y)² ≡ x² + 2xy + y² (অভেদ)"],
+    keywords: ["সমীকরণ", "equation", "অভেদ", "identity", "সমতা", "equality"],
+    category: 'basic',
+    difficulty: 2
+  },
+
+  {
+    topic: "ফাংশন ও সম্পর্ক",
+    content: "**ফাংশন (Function):** এক সেটের প্রতিটি উপাদানের সাথে অন্য সেটের ঠিক একটি উপাদানের সম্পর্ক।\n\n**প্রকাশ:** f(x) = 2x + 3\n\n**ধর্মাবলী:**\n- **ডোমেইন (Domain):** ইনপুট মানের সেট\n- **রেঞ্জ (Range):** আউটপুট মানের সেট\n- **একৈক (One-to-one):** প্রতিটি y এর জন্য একটি x\n- **সার্বিক (Onto):** রেঞ্জের সব উপাদান ব্যবহৃত",
+    examples: ["f(x) = x²", "g(x) = 2x + 1", "h(x) = √x"],
+    keywords: ["ফাংশন", "function", "ডোমেইন", "domain", "রেঞ্জ", "range", "সম্পর্ক"],
+    category: 'intermediate',
+    difficulty: 3
+  },
+
+  {
+    topic: "পূর্ণবর্গ সংখ্যা",
+    content: "**পূর্ণবর্গ সংখ্যা:** যে সংখ্যা কোনো পূর্ণ সংখ্যার বর্গ।\n\n**প্রথম ১০টি পূর্ণবর্গ:** 1, 4, 9, 16, 25, 36, 49, 64, 81, 100\n\n**বৈশিষ্ট্য:**\n- 1² = 1, 2² = 4, 3² = 9...\n- পূর্ণবর্গের বর্গমূল পূর্ণ সংখ্যা\n- বীজগণিতে: x² + 2ax + a² = (x + a)²",
+    examples: ["16 = 4²", "25 = 5²", "x² + 6x + 9 = (x + 3)²"],
+    keywords: ["পূর্ণবর্গ", "perfect square", "বর্গ", "square", "বর্গমূল", "square root"],
+    category: 'basic',
+    difficulty: 2
+  },
+
+  {
+    topic: "ত্রিকোণমিতিক পরিচয়",
+    content: "**ত্রিকোণমিতিক অনুপাত:**\n- sin θ, cos θ, tan θ\n- cosec θ, sec θ, cot θ\n\n**মূল পরিচয়:**\n- sin² θ + cos² θ = 1\n- 1 + tan² θ = sec² θ\n- 1 + cot² θ = cosec² θ\n\n**বীজগণিতে ব্যবহার:** ত্রিকোণমিতিক সমীকরণ সমাধান",
+    examples: ["sin² x + cos² x = 1", "tan θ = sin θ / cos θ"],
+    keywords: ["ত্রিকোণমিতি", "trigonometry", "sin", "cos", "tan", "পরিচয়"],
+    category: 'intermediate',
+    difficulty: 3
+  },
+
+  {
+    topic: "সমান্তর ও গুণোত্তর ধারা",
+    content: "**সমান্তর ধারা (AP):** যেখানে পার্থক্য ধ্রুব।\n- সাধারণ রূপ: a, a+d, a+2d, ...\n- nতম পদ: Tn = a + (n-1)d\n- যোগফল: Sn = n/2[2a + (n-1)d]\n\n**গুণোত্তর ধারা (GP):** যেখানে অনুপাত ধ্রুব।\n- সাধারণ রূপ: a, ar, ar², ...\n- nতম পদ: Tn = ar^(n-1)\n- যোগফল: Sn = a(r^n - 1)/(r - 1)",
+    examples: ["2, 5, 8, 11... (AP, d=3)", "2, 6, 18, 54... (GP, r=3)"],
+    keywords: ["সমান্তর", "arithmetic", "গুণোত্তর", "geometric", "ধারা", "progression"],
+    category: 'intermediate',
+    difficulty: 3
+  },
+
+  {
+    topic: "বিন্যাস ও সমাবেশ",
+    content: "**বিন্যাস (Permutation):** ক্রম গুরুত্বপূর্ণ।\n- nPr = n!/(n-r)!\n\n**সমাবেশ (Combination):** ক্রম গুরুত্বহীন।\n- nCr = n!/[r!(n-r)!]\n\n**বৈশিষ্ট্য:**\n- nCr = nC(n-r)\n- nC0 = nCn = 1\n- nC1 = n\n\n**দ্বিপদ উপপাদ্য:** (a+b)^n = Σ nCr × a^(n-r) × b^r",
+    examples: ["5P3 = 60", "5C3 = 10", "(x+y)³ এর বিস্তৃতি"],
+    keywords: ["বিন্যাস", "permutation", "সমাবেশ", "combination", "দ্বিপদ", "binomial"],
+    category: 'advanced',
+    difficulty: 4
+  },
+
+  {
+    topic: "সংখ্যা তত্ত্বের মূলনীতি",
+    content: "**মৌলিক সংখ্যা:** যার কেবল দুইটি ভাজক (১ ও নিজেই)।\n\n**যৌগিক সংখ্যা:** যার দুইয়ের বেশি ভাজক।\n\n**গুরুত্বপূর্ণ উপপাদ্য:**\n- প্রত্যেক সংখ্যাকে মৌলিক সংখ্যার গুণফল হিসেবে প্রকাশ করা যায়\n- অসীম সংখ্যক মৌলিক সংখ্যা আছে\n\n**ইউক্লিডীয় অ্যালগরিদম:** গ.সা.গু নির্ণয়ের পদ্ধতি",
+    examples: ["12 = 2² × 3", "gcd(48, 18) = 6"],
+    keywords: ["মৌলিক", "prime", "যৌগিক", "composite", "গসাগু", "gcd", "লসাগু"],
+    category: 'intermediate',
+    difficulty: 3
+  },
+
+  {
+    topic: "গ্রাফ তত্ত্ব ও বীজগণিত",
+    content: "**গ্রাফের বীজগণিতিক উপস্থাপনা:**\n\n**Adjacency Matrix:** গ্রাফের সংযোগ ম্যাট্রিক্স দিয়ে প্রকাশ।\n\n**বৈশিষ্ট্য বহুপদ (Characteristic Polynomial):** det(A - λI)\n\n**ব্যবহার:**\n- নেটওয়ার্ক বিশ্লেষণ\n- ডেটা স্ট্রাকচার\n- সামাজিক নেটওয়ার্ক\n\n**Eigenvalue ও Eigenvector:** গ্রাফের গাঠনিক তথ্য প্রদান",
+    examples: ["A = [0 1; 1 0]", "det(A - λI) = λ² - 1"],
+    keywords: ["গ্রাফ", "graph", "ম্যাট্রিক্স", "matrix", "eigenvalue", "নেটওয়ার্ক"],
+    category: 'advanced',
+    difficulty: 5
   }
 ];
 
