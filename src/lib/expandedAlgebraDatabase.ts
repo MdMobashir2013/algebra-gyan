@@ -23,6 +23,21 @@ export const expandedAlgebraDatabase: AlgebraKnowledge[] = [
     category: 'basic',
     difficulty: 1
   },
+  
+  // General conversational responses
+  {
+    topic: "সাধারণ কথোপকথন",
+    content: "আমি ভালো আছি, ধন্যবাদ! আমি একটি বীজগণিত শিক্ষক এআই। আমি আপনাকে বীজগণিতের যেকোনো বিষয়ে সাহায্য করতে পারি।\n\n**আমি কী কী করতে পারি:**\n• গাণিতিক সমস্যা সমাধান\n• বীজগণিতীয় ধারণা ব্যাখ্যা\n• সূত্র ও পদ্ধতি শেখানো\n• হিসাব-নিকাশে সাহায্য করা\n\nআপনার কী সাহায্য লাগবে?",
+    examples: [
+      "কেমন আছো? → আমি ভালো আছি!",
+      "হ্যালো → আসসালামু আলাইকুম!",
+      "ধন্যবাদ → আপনাকেও ধন্যবাদ!",
+      "সাহায্য করো → অবশ্যই! কী নিয়ে?"
+    ],
+    keywords: ["কেমন", "আছো", "হ্যালো", "hello", "ধন্যবাদ", "thanks", "সাহায্য", "help", "হাই", "hi"],
+    category: 'basic',
+    difficulty: 1
+  },
   {
     topic: "বীজগণিতের সূত্র",
     content: "**বীজগণিতের প্রয়োজনীয় সূত্রাবলী:**\n\n**🔹 বর্গের সূত্র:**\n• (a + b)² = a² + 2ab + b²\n• (a - b)² = a² - 2ab + b²\n• a² - b² = (a + b)(a - b)\n\n**🔹 ঘনের সূত্র:**\n• (a + b)³ = a³ + 3a²b + 3ab² + b³\n• (a - b)³ = a³ - 3a²b + 3ab² - b³\n• a³ + b³ = (a + b)(a² - ab + b²)\n• a³ - b³ = (a - b)(a² + ab + b²)\n\n**🔹 বিশেষ সূত্র:**\n• (a + b + c)² = a² + b² + c² + 2ab + 2bc + 2ca\n• a⁴ - b⁴ = (a² + b²)(a + b)(a - b)",
@@ -368,14 +383,55 @@ export const expandedAlgebraDatabase: AlgebraKnowledge[] = [
   }
 ];
 
-// Helper functions for database queries
+// Enhanced search function for better matching
 export const searchDatabase = (query: string): AlgebraKnowledge[] => {
-  const searchTerm = query.toLowerCase();
-  return expandedAlgebraDatabase.filter(item => 
-    item.keywords.some(keyword => keyword.toLowerCase().includes(searchTerm)) ||
-    item.topic.toLowerCase().includes(searchTerm) ||
-    item.content.toLowerCase().includes(searchTerm)
-  );
+  const lowerQuery = query.toLowerCase();
+  
+  // Enhanced search with better keyword matching and scoring
+  const scored = expandedAlgebraDatabase.map(knowledge => {
+    let score = 0;
+    
+    // Exact keyword matches (highest priority)
+    for (const keyword of knowledge.keywords) {
+      if (lowerQuery.includes(keyword.toLowerCase())) {
+        score += 150;
+        break;
+      }
+    }
+    
+    // Topic title exact matches
+    if (knowledge.topic.toLowerCase().includes(lowerQuery)) {
+      score += 120;
+    }
+    
+    // Partial matches in topic
+    const topicWords = knowledge.topic.toLowerCase().split(' ');
+    const queryWords = lowerQuery.split(' ');
+    for (const qWord of queryWords) {
+      for (const tWord of topicWords) {
+        if (tWord.includes(qWord) || qWord.includes(tWord)) {
+          score += 80;
+        }
+      }
+    }
+    
+    // Content matches (lower priority)
+    if (knowledge.content.toLowerCase().includes(lowerQuery)) {
+      score += 40;
+    }
+    
+    // Specific problem type matching
+    if (lowerQuery.includes('=') && knowledge.category === 'basic') {
+      score += 100; // Boost for equation solving
+    }
+    
+    return { knowledge, score };
+  })
+  .filter(item => item.score > 0)
+  .sort((a, b) => b.score - a.score)
+  .map(item => item.knowledge);
+  
+  return scored;
 };
 
 export const getByCategory = (category: AlgebraKnowledge['category']): AlgebraKnowledge[] => {
