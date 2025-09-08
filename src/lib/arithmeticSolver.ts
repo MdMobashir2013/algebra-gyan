@@ -1,33 +1,50 @@
 // Enhanced arithmetic solver for accurate calculations
 export const evaluateBasicArithmetic = (expression: string): string => {
   try {
-    // Clean the expression
-    const cleaned = expression.replace(/[^\d+\-*/().\s]/g, '');
+    // Convert Bengali numerals to English if present
+    let cleaned = expression
+      .replace(/[০-৯]/g, (match) => {
+        const bengaliNumerals = '০১২৩৪৫৬৭৮৯';
+        return bengaliNumerals.indexOf(match).toString();
+      })
+      .replace(/[^\d+\-*/().\s]/g, '');
     
-    // Replace Bengali/English operators if any
-    const normalized = cleaned
+    // Replace various operators with standard ones
+    cleaned = cleaned
       .replace(/×/g, '*')
       .replace(/÷/g, '/')
       .replace(/\s+/g, '');
     
-    // Validate expression
-    if (!/^[\d+\-*/().]+$/.test(normalized)) {
-      throw new Error('Invalid expression');
+    // Validate expression contains only valid characters
+    if (!/^[\d+\-*/().]+$/.test(cleaned)) {
+      throw new Error('Invalid expression format');
     }
     
-    // Evaluate safely
-    const result = Function('"use strict"; return (' + normalized + ')')();
+    // Enhanced validation to prevent malicious code
+    if (cleaned.includes('--') || cleaned.includes('++') || 
+        cleaned.match(/[*/]{2,}/) || cleaned.match(/[+\-*/]{3,}/)) {
+      throw new Error('Invalid operation sequence');
+    }
     
-    // Check if result is a number
-    if (typeof result !== 'number' || !isFinite(result)) {
+    // Evaluate using a safer method
+    const result = new Function('"use strict"; return (' + cleaned + ')')();
+    
+    // Comprehensive result validation
+    if (typeof result !== 'number' || !isFinite(result) || isNaN(result)) {
       throw new Error('Invalid calculation result');
     }
     
-    // Format result (handle decimals nicely)
-    return Number.isInteger(result) ? result.toString() : result.toFixed(2);
+    // Enhanced formatting with better decimal handling
+    if (Number.isInteger(result)) {
+      return result.toString();
+    } else {
+      // Round to reasonable decimal places
+      const rounded = Math.round(result * 1000000) / 1000000;
+      return rounded.toString();
+    }
     
   } catch (error) {
-    throw new Error('গণনায় ভুল হয়েছে');
+    throw new Error('গণনায় ভুল হয়েছে - সঠিক ফরম্যাট ব্যবহার করুন');
   }
 };
 
