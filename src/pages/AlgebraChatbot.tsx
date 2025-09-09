@@ -95,8 +95,17 @@ const AlgebraChatbot = () => {
         
         const result = squaringSolver.square(expression);
         
+        // Format steps with proper Bengali numbering and structure
+        const formattedSteps = result.steps.map((step, index) => {
+          if (step === '') return '';
+          if (step.startsWith('ধাপ')) {
+            return `\n**${step}**`;
+          }
+          return step;
+        }).join('\n');
+        
         return {
-          content: `🔲 **বর্গ করার সমাধান**\n\n**প্রশ্ন:** ${result.original}²\n\n**🔹 ব্যবহৃত সূত্র:** ${result.formula}\n\n**📝 ধাপে ধাপে সমাধান:**\n${result.steps.map((step, i) => `${i + 1}. ${step}`).join('\n')}\n\n**✅ চূড়ান্ত উত্তর:** ${result.result}\n\n*আরো বর্গ করতে চান? অন্য একটি রাশি দিন!*`,
+          content: `📐 **${result.original} এর বর্গ সম্প্রসারণ**\n\n**🔹 প্রয়োগকৃত সূত্র:** \`${result.formula}\`\n\n${formattedSteps}\n\n🎯 **চূড়ান্ত উত্তর:** \`${result.result}\`\n\n*আরো বর্গ করতে চান? উদাহরণ: "(a+2) বর্গ করো"*`,
           type: 'solution'
         };
       } catch (error) {

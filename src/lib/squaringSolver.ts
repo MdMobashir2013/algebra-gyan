@@ -110,19 +110,33 @@ function squareBinomial(expr: string): SquaringResult {
   const formula = isAddition ? '(a + b)² = a² + 2ab + b²' : '(a - b)² = a² - 2ab + b²';
   
   const steps = [
-    `${expr}² এর জন্য সূত্র প্রয়োগ করি`,
+    `ধাপ ১: সূত্র প্রয়োগ করি`,
     `সূত্র: ${formula}`,
     `এখানে a = ${a}, b = ${b}`,
-    `${expr}² = ${a}² ${isAddition ? '+' : '-'} 2(${a})(${b}) + ${b}²`
+    ``,
+    `ধাপ ২: সূত্রে মান বসিয়ে লিখি`,
+    `${expr}² = (${a})² ${isAddition ? '+' : '-'} 2(${a})(${b}) + (${b})²`,
+    ``,
+    `ধাপ ৩: প্রতিটি গুণফল আলাদাভাবে হিসাব করি`
   ];
   
-  // চূড়ান্ত ফলাফল গণনা
+  // প্রতিটি গুণফল আলাদাভাবে হিসাব
   const aSquared = formatSquare(a);
   const bSquared = formatSquare(b);
-  const middleTerm = formatMiddleTerm(a, b, isAddition);
+  const middleProduct = formatMiddleProduct(a, b);
   
-  const finalResult = `${aSquared} ${isAddition ? '+' : '-'} ${middleTerm} + ${bSquared}`;
-  steps.push(`= ${finalResult}`);
+  steps.push(`(${a})² = ${aSquared}`);
+  steps.push(`2(${a})(${b}) = ${middleProduct}`);
+  steps.push(`(${b})² = ${bSquared}`);
+  steps.push(``);
+  
+  // চূড়ান্ত ফলাফল
+  const finalResult = isAddition ? 
+    `${aSquared} + ${middleProduct} + ${bSquared}` :
+    `${aSquared} - ${middleProduct} + ${bSquared}`;
+    
+  steps.push(`ধাপ ৪: চূড়ান্ত উত্তর`);
+  steps.push(`${expr}² = ${finalResult}`);
   
   return {
     original: expr,
@@ -193,9 +207,50 @@ function formatSquare(term: string): string {
   return `(${term})²`;
 }
 
+function formatMiddleProduct(a: string, b: string): string {
+  // 2ab গণনা করা
+  let coefficient = 2;
+  let variables = '';
+  
+  // a এর সহগ বের করা
+  const aMatch = a.match(/^(\d*)([a-z]*)$/);
+  if (aMatch) {
+    const aCoeff = aMatch[1] ? parseInt(aMatch[1]) : 1;
+    const aVar = aMatch[2] || '';
+    coefficient *= aCoeff;
+    if (aVar) variables += aVar;
+  } else if (/^\d+$/.test(a)) {
+    coefficient *= parseInt(a);
+  } else {
+    variables += a;
+  }
+  
+  // b এর সহগ বের করা
+  const bMatch = b.match(/^(\d*)([a-z]*)$/);
+  if (bMatch) {
+    const bCoeff = bMatch[1] ? parseInt(bMatch[1]) : 1;
+    const bVar = bMatch[2] || '';
+    coefficient *= bCoeff;
+    if (bVar) variables += bVar;
+  } else if (/^\d+$/.test(b)) {
+    coefficient *= parseInt(b);
+  } else {
+    variables += b;
+  }
+  
+  // ফলাফল ফরম্যাট করা
+  if (coefficient === 1 && variables) {
+    return variables;
+  } else if (coefficient !== 1 && variables) {
+    return `${coefficient}${variables}`;
+  } else {
+    return coefficient.toString();
+  }
+}
+
 function formatMiddleTerm(a: string, b: string, isPositive: boolean): string {
-  const sign = isPositive ? '' : '-';
-  return `${sign}2${a}${b}`;
+  const product = formatMiddleProduct(a, b);
+  return isPositive ? product : `-${product}`;
 }
 
 function formatProduct(term1: string, term2: string, isPositive: boolean): string {
@@ -207,8 +262,10 @@ function formatProduct(term1: string, term2: string, isPositive: boolean): strin
 export const getSquaringExamples = (): string[] => [
   "5² = 25",
   "x² = x²", 
+  "(x + y)² = x² + 2xy + y²",
+  "(a + 2)² = a² + 4a + 4",
   "(x + 3)² = x² + 6x + 9",
   "(2x - 1)² = 4x² - 4x + 1",
   "(a + b + c)² = a² + b² + c² + 2ab + 2bc + 2ca",
-  "3x² = 9x²"
+  "3x বর্গ = 9x²"
 ];
