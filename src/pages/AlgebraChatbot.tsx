@@ -78,9 +78,10 @@ const AlgebraChatbot = () => {
       };
     }
 
-    // Enhanced squaring functionality - More specific detection
-    if ((input.includes('বর্গ') || input.includes('square') || input.includes('²')) ||
-        (input.includes('কর') && (input.includes('বর্গ') || input.includes('square') || input.match(/\([^)]+\)\s*কর/)))) {
+    // Enhanced squaring functionality - Only trigger for clear squaring requests
+    if (input.match(/^(\d+|[a-z]|\([^)]+\))\s*(বর্গ|square|\^2|²)/i) || 
+        input.match(/^(বর্গ|square)\s+(\d+|[a-z]|\([^)]+\))/i) ||
+        input.match(/(\d+|[a-z]|\([^)]+\))\s+(বর্গ\s+কর|square)/i)) {
       try {
         // Extract the expression to square
         let expression = userInput;

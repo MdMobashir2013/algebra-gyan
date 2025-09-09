@@ -59,9 +59,10 @@ export class AlgebraSolver {
       return this.solveAlgebraDivision(trimmedProblem);
     }
     
-    // Check for squaring operations - More specific detection
-    if ((trimmedProblem.match(/বর্গ|square|\^2|²/i) && !trimmedProblem.includes('=')) || 
-        trimmedProblem.match(/\([^)]+\)\s*বর্গ|\([^)]+\)\s*square/i)) {
+    // Check for squaring operations - Only if it's clearly a squaring request
+    if (trimmedProblem.match(/^(\d+|[a-z]|\([^)]+\))\s*(বর্গ|square|\^2|²)/i) || 
+        trimmedProblem.match(/^(বর্গ|square)\s+(\d+|[a-z]|\([^)]+\))/i) ||
+        trimmedProblem.match(/(\d+|[a-z]|\([^)]+\))\s+(বর্গ\s+কর|square)/i)) {
       return this.solveSquaring(trimmedProblem);
     }
     
@@ -126,6 +127,11 @@ export class AlgebraSolver {
     // Remove বর্গ keyword if it appears after the expression
     expression = expression.replace(/বর্গ$/i, '');
     
+    // If no valid expression found, return error
+    if (!expression || expression.length === 0) {
+      throw new Error('বর্গ করার জন্য একটি বৈধ রাশি প্রদান করুন। উদাহরণ: (x+3)² বা 5²');
+    }
+    
     try {
       const result = squaringSolver.square(expression);
       
@@ -141,7 +147,8 @@ export class AlgebraSolver {
         solution: `${result.original}² = ${result.result}`
       };
     } catch (error) {
-      throw new Error('বর্গ করার সমস্যা - সঠিক ফরম্যাট ব্যবহার করুন।');
+      // Re-throw the original error from squaringSolver for better error messages
+      throw error;
     }
   }
 
