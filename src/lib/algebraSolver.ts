@@ -1,3 +1,5 @@
+import { squaringSolver } from './squaringSolver';
+
 interface Solution {
   type: string;
   variable: string;
@@ -57,9 +59,14 @@ export class AlgebraSolver {
       return this.solveAlgebraDivision(trimmedProblem);
     }
     
+    // Check for squaring operations
+    if (trimmedProblem.match(/বর্গ|square|\^2|²/i) || 
+        trimmedProblem.match(/\([^)]+\)\^?2?²?/)) {
+      return this.solveSquaring(trimmedProblem);
+    }
+    
     // Check for algebraic formulas (square of sum/difference patterns)
-    if (trimmedProblem.match(/expand|square|বর্গ|বিস্তার|formula|সূত্র/i) || 
-        trimmedProblem.match(/\([^)]+\)\^2|\([^)]+\)²/)) {
+    if (trimmedProblem.match(/expand|বিস্তার|formula|সূত্র/i)) {
       return this.solveAlgebraicFormula(trimmedProblem);
     }
     
@@ -101,6 +108,41 @@ export class AlgebraSolver {
 
     // Linear equation
     return this.solveLinear(left, right, trimmedProblem);
+  }
+
+  // New squaring solver
+  private static solveSquaring(problem: string): Solution {
+    // Extract the expression to be squared
+    let expression = problem
+      .replace(/বর্গ\s*করো?|বর্গ\s*কর|square|করো|কর/gi, '')
+      .replace(/\s+/g, '')
+      .trim();
+    
+    // Handle different formats
+    if (expression.includes('=')) {
+      expression = expression.split('=')[0].trim();
+    }
+    
+    // Remove বর্গ keyword if it appears after the expression
+    expression = expression.replace(/বর্গ$/i, '');
+    
+    try {
+      const result = squaringSolver.square(expression);
+      
+      return {
+        type: 'squaring',
+        variable: 'বর্গ',
+        steps: [
+          `মূল রাশি: ${result.original}`,
+          `প্রয়োগকৃত সূত্র: ${result.formula}`,
+          '',
+          ...result.steps
+        ],
+        solution: `${result.original}² = ${result.result}`
+      };
+    } catch (error) {
+      throw new Error('বর্গ করার সমস্যা - সঠিক ফরম্যাট ব্যবহার করুন।');
+    }
   }
 
   // New algebraic formula solver

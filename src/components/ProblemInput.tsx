@@ -31,6 +31,9 @@ export const ProblemInput = ({ problem, setProblem, onSolve, isLoading }: Proble
     { equation: "বিয়োগ 3x+5, x+2", description: "বীজগণিতিক বিয়োগ" },
     { equation: "গুণ x+2, x-3", description: "বীজগণিতিক গুণ" },
     { equation: "ভাগ x^2-4, x-2", description: "বীজগণিতিক ভাগ" },
+    { equation: "5² বর্গ করো", description: "সংখ্যার বর্গ" },
+    { equation: "(x+3)² বর্গ করো", description: "দ্বিপদীর বর্গ" },
+    { equation: "3x বর্গ করো", description: "চলকের বর্গ" },
   ];
 
   return (
