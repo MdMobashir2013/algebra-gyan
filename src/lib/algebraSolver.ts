@@ -59,9 +59,9 @@ export class AlgebraSolver {
       return this.solveAlgebraDivision(trimmedProblem);
     }
     
-    // Check for squaring operations
-    if (trimmedProblem.match(/বর্গ|square|\^2|²/i) || 
-        trimmedProblem.match(/\([^)]+\)\^?2?²?/)) {
+    // Check for squaring operations - More specific detection
+    if ((trimmedProblem.match(/বর্গ|square|\^2|²/i) && !trimmedProblem.includes('=')) || 
+        trimmedProblem.match(/\([^)]+\)\s*বর্গ|\([^)]+\)\s*square/i)) {
       return this.solveSquaring(trimmedProblem);
     }
     

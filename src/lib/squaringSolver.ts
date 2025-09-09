@@ -12,6 +12,11 @@ export const squaringSolver = {
   square: (expression: string): SquaringResult => {
     const cleaned = expression.trim().replace(/\s+/g, '');
     
+    // খালি স্ট্রিং চেক
+    if (!cleaned) {
+      throw new Error('বর্গ করার জন্য একটি রাশি প্রয়োজন');
+    }
+    
     // সংখ্যা বর্গ করা
     if (/^\d+$/.test(cleaned)) {
       return squareNumber(cleaned);
@@ -37,7 +42,12 @@ export const squaringSolver = {
       return squareVariableWithCoefficient(cleaned);
     }
     
-    throw new Error('অসমর্থিত বীজগাণিতিক রাশি');
+    // সংখ্যা এবং চলকের মিশ্রণ যেমন 2x+3 এর বর্গ করার জন্য বন্ধনী প্রয়োজন
+    if (cleaned.includes('+') || cleaned.includes('-')) {
+      throw new Error('দ্বিপদী বা ত্রিপদী বর্গ করতে বন্ধনী ব্যবহার করুন। উদাহরণ: (x+3)²');
+    }
+    
+    throw new Error(`'${expression}' এই রাশিটি বর্গ করা যায় না। সঠিক ফরম্যাট: 5, x, (x+3), (a-b)`);
   }
 };
 
