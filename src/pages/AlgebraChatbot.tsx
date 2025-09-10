@@ -78,10 +78,9 @@ const AlgebraChatbot = () => {
       };
     }
 
-    // Enhanced squaring functionality - Only trigger for clear squaring requests
-    if (input.match(/^(\d+|[a-z]|\([^)]+\))\s*(বর্গ|square|\^2|²)/i) || 
-        input.match(/^(বর্গ|square)\s+(\d+|[a-z]|\([^)]+\))/i) ||
-        input.match(/(\d+|[a-z]|\([^)]+\))\s+(বর্গ\s+কর|square)/i)) {
+    // Enhanced squaring functionality - Include numbers, variables, and expressions
+    if ((input.includes('বর্গ') || input.includes('square') || input.includes('²') || input.includes('^2')) && 
+        !input.includes('=') && !input.includes('সূত্র') && !input.includes('formula')) {
       try {
         // Extract the expression to square
         let expression = userInput;
@@ -497,41 +496,41 @@ const AlgebraChatbot = () => {
           <Button
             variant="outline"
             className="p-4 h-auto flex flex-col items-start text-left font-['Hind_Siliguri'] hover:bg-primary/5 border-primary/20"
-            onClick={() => setInput("2x + 5 = 15 সমাধান করো")}
+            onClick={() => setInput("৫² কত?")}
           >
             <Calculator className="h-5 w-5 mb-2 text-primary" />
-            <div className="font-semibold text-sm">🧮 রৈখিক সমীকরণ</div>
-            <div className="text-xs text-muted-foreground">2x + 5 = 15 সমাধান</div>
+            <div className="font-semibold text-sm">🧮 বর্গ গণনা</div>
+            <div className="text-xs text-muted-foreground">৫² = ?</div>
           </Button>
           
           <Button
             variant="outline"
             className="p-4 h-auto flex flex-col items-start text-left font-['Hind_Siliguri'] hover:bg-primary/5 border-primary/20"
-            onClick={() => setInput("x² + 3x + 2 = 0 সমাধান করো")}
+            onClick={() => setInput("(x+3)² সম্প্রসারণ করো")}
           >
             <Sparkles className="h-5 w-5 mb-2 text-primary" />
-            <div className="font-semibold text-sm">📐 দ্বিঘাত সমীকরণ</div>
-            <div className="text-xs text-muted-foreground">x² + 3x + 2 = 0</div>
+            <div className="font-semibold text-sm">📐 বর্গ সম্প্রসারণ</div>
+            <div className="text-xs text-muted-foreground">(x+3)² বিস্তার</div>
           </Button>
           
           <Button
             variant="outline"
             className="p-4 h-auto flex flex-col items-start text-left font-['Hind_Siliguri'] hover:bg-primary/5 border-primary/20"
-            onClick={() => setInput("গুণনীয়করণ কী?")}
+            onClick={() => setInput("আল-খোয়ারিজমি কে?")}
           >
             <BookOpen className="h-5 w-5 mb-2 text-primary" />
-            <div className="font-semibold text-sm">🔢 গুণনীয়করণ</div>
-            <div className="text-xs text-muted-foreground">ধারণা ও পদ্ধতি</div>
+            <div className="font-semibold text-sm">👨‍🔬 মহান গণিতবিদ</div>
+            <div className="text-xs text-muted-foreground">বীজগণিতের জনক</div>
           </Button>
           
           <Button
             variant="outline"
             className="p-4 h-auto flex flex-col items-start text-left font-['Hind_Siliguri'] hover:bg-primary/5 border-primary/20"
-            onClick={() => setInput("বীজগণিতের ইতিহাস বলো")}
+            onClick={() => setInput("আল-জাবর বই সম্পর্কে বলো")}
           >
             <History className="h-5 w-5 mb-2 text-primary" />
-            <div className="font-semibold text-sm">🏛️ ইতিহাস</div>
-            <div className="text-xs text-muted-foreground">আল-খোয়ারিজমি থেকে আজ</div>
+            <div className="font-semibold text-sm">📚 ঐতিহাসিক গ্রন্থ</div>
+            <div className="text-xs text-muted-foreground">প্রথম বীজগণিত বই</div>
           </Button>
         </div>
         

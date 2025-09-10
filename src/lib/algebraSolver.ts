@@ -59,10 +59,8 @@ export class AlgebraSolver {
       return this.solveAlgebraDivision(trimmedProblem);
     }
     
-    // Check for squaring operations - Only if it's clearly a squaring request
-    if (trimmedProblem.match(/^(\d+|[a-z]|\([^)]+\))\s*(বর্গ|square|\^2|²)/i) || 
-        trimmedProblem.match(/^(বর্গ|square)\s+(\d+|[a-z]|\([^)]+\))/i) ||
-        trimmedProblem.match(/(\d+|[a-z]|\([^)]+\))\s+(বর্গ\s+কর|square)/i)) {
+    // Check for squaring operations - Include numbers, variables, and expressions
+    if (trimmedProblem.match(/(বর্গ|square|\^2|²)/i) && !trimmedProblem.includes('=')) {
       return this.solveSquaring(trimmedProblem);
     }
     
