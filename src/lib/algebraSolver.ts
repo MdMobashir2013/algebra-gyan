@@ -42,6 +42,16 @@ export class AlgebraSolver {
   static solve(problem: string): Solution {
     const trimmedProblem = problem.trim();
     
+    // Check for simple addition patterns like "1x+2x" or "যোগ কর 1x+2x"
+    if (trimmedProblem.match(/^(\d*[a-z]\d*\s*[+]\s*\d*[a-z]\d*)|যোগ.*\d*[a-z].*[+].*\d*[a-z]/i)) {
+      return this.solveSimpleAddition(trimmedProblem);
+    }
+    
+    // Check for simple subtraction patterns
+    if (trimmedProblem.match(/^(\d*[a-z]\d*\s*[-]\s*\d*[a-z]\d*)|বিয়োগ.*\d*[a-z].*[-].*\d*[a-z]/i)) {
+      return this.solveSimpleSubtraction(trimmedProblem);
+    }
+    
     // Check for algebraic operations
     if (trimmedProblem.match(/algebra\s*plus|বীজগাণিত\s*যোগ|^যোগ\s/i)) {
       return this.solveAlgebraPlus(trimmedProblem);
@@ -263,6 +273,93 @@ export class AlgebraSolver {
       variable: 'সরলীকরণ',
       steps,
       solution: `সরলীকৃত রূপ = ${simplified}`
+    };
+  }
+
+  // Simple addition/subtraction solvers for direct expressions
+  private static solveSimpleAddition(problem: string): Solution {
+    console.log('Solving simple addition for:', problem);
+    
+    // Extract the mathematical expression from the problem
+    let expression = problem.replace(/যোগ\s*কর|যোগ|add|plus/gi, '').trim();
+    console.log('Cleaned expression:', expression);
+    
+    // Match patterns like "1x+2x" or "2x + 3x"
+    const match = expression.match(/(\d*)([a-z])(\d*)\s*[+]\s*(\d*)([a-z])(\d*)/i);
+    console.log('Regex match result:', match);
+    
+    if (!match) {
+      throw new Error('সঠিক ফরম্যাটে লিখুন। উদাহরণ: 1x+2x বা 3y+5y');
+    }
+    
+    const [, coeff1, var1, power1, coeff2, var2, power2] = match;
+    
+    // Check if variables are the same
+    if (var1.toLowerCase() !== var2.toLowerCase()) {
+      throw new Error('একই চলক থাকতে হবে যোগের জন্য।');
+    }
+    
+    // Parse coefficients (default to 1 if empty)
+    const c1 = coeff1 === '' ? 1 : parseInt(coeff1) || 1;
+    const c2 = coeff2 === '' ? 1 : parseInt(coeff2) || 1;
+    
+    const result = c1 + c2;
+    const variable = var1.toLowerCase();
+    
+    const steps: string[] = [
+      `প্রদত্ত সমস্যা: ${expression}`,
+      '',
+      'সমাধানের ধাপসমূহ:',
+      `১. সদৃশ পদ একত্রিত করি`,
+      `${c1}${variable} + ${c2}${variable} = ${result}${variable}`
+    ];
+
+    return {
+      type: 'simple_addition',
+      variable: variable,
+      steps,
+      solution: `যোগফল = ${result}${variable}`
+    };
+  }
+
+  private static solveSimpleSubtraction(problem: string): Solution {
+    // Extract the mathematical expression from the problem
+    let expression = problem.replace(/বিয়োগ\s*কর|বিয়োগ|subtract|minus/gi, '').trim();
+    
+    // Match patterns like "5x-2x" or "7y - 3y"
+    const match = expression.match(/(\d*)([a-z])(\d*)\s*[-]\s*(\d*)([a-z])(\d*)/i);
+    
+    if (!match) {
+      throw new Error('সঠিক ফরম্যাটে লিখুন। উদাহরণ: 5x-2x বা 7y-3y');
+    }
+    
+    const [, coeff1, var1, power1, coeff2, var2, power2] = match;
+    
+    // Check if variables are the same
+    if (var1.toLowerCase() !== var2.toLowerCase()) {
+      throw new Error('একই চলক থাকতে হবে বিয়োগের জন্য।');
+    }
+    
+    // Parse coefficients (default to 1 if empty)
+    const c1 = coeff1 === '' ? 1 : parseInt(coeff1) || 1;
+    const c2 = coeff2 === '' ? 1 : parseInt(coeff2) || 1;
+    
+    const result = c1 - c2;
+    const variable = var1.toLowerCase();
+    
+    const steps: string[] = [
+      `প্রদত্ত সমস্যা: ${expression}`,
+      '',
+      'সমাধানের ধাপসমূহ:',
+      `১. সদৃশ পদ বিয়োগ করি`,
+      `${c1}${variable} - ${c2}${variable} = ${result}${variable}`
+    ];
+
+    return {
+      type: 'simple_subtraction',
+      variable: variable,
+      steps,
+      solution: `বিয়োগফল = ${result}${variable}`
     };
   }
 

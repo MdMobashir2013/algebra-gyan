@@ -78,6 +78,52 @@ const AlgebraChatbot = () => {
       };
     }
 
+    // Check for simple mathematical expressions first
+    if (input.match(/^\d*[a-z]\d*\s*[+]\s*\d*[a-z]\d*$/i) || 
+        input.match(/যোগ.*\d*[a-z].*[+].*\d*[a-z]/i)) {
+      try {
+        const result = AlgebraSolver.solve(userInput);
+        
+        // Format the response
+        const formattedSteps = result.steps.map((step, index) => 
+          `${index + 1}. ${step}`
+        ).join('\n');
+        
+        return { 
+          content: `🔍 **সমাধান প্রক্রিয়া:**\n\n**প্রদত্ত সমস্যা:** ${result.type === 'simple_addition' ? userInput : result.solution}\n\n**সমাধানের ধাপসমূহ:**\n${formattedSteps}\n\n**✅ চূড়ান্ত উত্তর:** ${result.solution}\n\n**📝 টাইপ:** এটি একটি ${result.type}\n\n*আরো সমস্যার জন্য আমাকে বলুন!*`, 
+          type: 'solution' 
+        };
+      } catch (error) {
+        return { 
+          content: `❌ ${error instanceof Error ? error.message : 'অজানা ত্রুটি'}`, 
+          type: 'general' 
+        };
+      }
+    }
+
+    // Check for simple subtraction expressions
+    if (input.match(/^\d*[a-z]\d*\s*[-]\s*\d*[a-z]\d*$/i) || 
+        input.match(/বিয়োগ.*\d*[a-z].*[-].*\d*[a-z]/i)) {
+      try {
+        const result = AlgebraSolver.solve(userInput);
+        
+        // Format the response
+        const formattedSteps = result.steps.map((step, index) => 
+          `${index + 1}. ${step}`
+        ).join('\n');
+        
+        return { 
+          content: `🔍 **সমাধান প্রক্রিয়া:**\n\n**প্রদত্ত সমস্যা:** ${result.type === 'simple_subtraction' ? userInput : result.solution}\n\n**সমাধানের ধাপসমূহ:**\n${formattedSteps}\n\n**✅ চূড়ান্ত উত্তর:** ${result.solution}\n\n**📝 টাইপ:** এটি একটি ${result.type}\n\n*আরো সমস্যার জন্য আমাকে বলুন!*`, 
+          type: 'solution' 
+        };
+      } catch (error) {
+        return { 
+          content: `❌ ${error instanceof Error ? error.message : 'অজানা ত্রুটি'}`, 
+          type: 'general' 
+        };
+      }
+    }
+
     // Enhanced squaring functionality - Include numbers, variables, and expressions
     if ((input.includes('বর্গ') || input.includes('square') || input.includes('²') || input.includes('^2')) && 
         !input.includes('=') && !input.includes('সূত্র') && !input.includes('formula')) {
