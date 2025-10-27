@@ -125,12 +125,13 @@ const AlgebraChatbot = () => {
     }
 
     // Enhanced squaring functionality - Include numbers, variables, and expressions
-    if ((input.includes('বর্গ') || input.includes('square') || input.includes('²') || input.includes('^2')) && 
+    if ((input.includes('বর্গ') || input.includes('square') || input.includes('²') || input.includes('^2') || 
+         input.includes('সম্প্রসারণ') || input.includes('expand') || input.includes('বিস্তৃতি')) && 
         !input.includes('=') && !input.includes('সূত্র') && !input.includes('formula')) {
       try {
         // Extract the expression to square
         let expression = userInput;
-        expression = expression.replace(/বর্গ\s*কর(?:ো)?|square|করো|কর/gi, '').trim();
+        expression = expression.replace(/বর্গ\s*কর(?:ো)?|square|করো|কর|সম্প্রসারণ|expand|বিস্তৃতি/gi, '').trim();
         
         // Handle cases where the number/expression comes before বর্গ
         if (expression.includes('বর্গ')) {
