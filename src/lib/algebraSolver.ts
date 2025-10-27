@@ -99,7 +99,14 @@ export class AlgebraSolver {
       return this.solveSimplification(trimmedProblem);
     }
 
-    const equation = trimmedProblem.replace(/\s/g, '');
+    // Normalize: Replace ² with ^2, ³ with ^3 for consistent parsing
+    const normalizedProblem = trimmedProblem
+      .replace(/²/g, '^2')
+      .replace(/³/g, '^3')
+      .replace(/×/g, '*')
+      .replace(/÷/g, '/');
+    
+    const equation = normalizedProblem.replace(/\s/g, '');
 
     if (!equation.includes('=')) {
       throw new Error('এটি একটি বৈধ সমীকরণ নয়। দয়া করে "=" চিহ্ন যুক্ত সমীকরণ দিন।');
@@ -110,13 +117,17 @@ export class AlgebraSolver {
       throw new Error('সমীকরণটি সঠিকভাবে লিখুন।');
     }
 
-    // Quadratic detection
-    if ((left.includes('^2') || right.includes('^2')) && (left.match(/[a-z]/i) || right.match(/[a-z]/i))) {
+    // Enhanced Quadratic detection - Check for ^2 or x² patterns
+    const hasQuadraticTerm = left.includes('^2') || right.includes('^2') || 
+                             left.match(/[a-z]2/i) || right.match(/[a-z]2/i);
+    const hasVariable = left.match(/[a-z]/i) || right.match(/[a-z]/i);
+    
+    if (hasQuadraticTerm && hasVariable) {
       return this.solveQuadratic(left, right);
     }
 
     // Linear equation
-    return this.solveLinear(left, right, trimmedProblem);
+    return this.solveLinear(left, right, normalizedProblem);
   }
 
   // New squaring solver
@@ -807,18 +818,40 @@ export class AlgebraSolver {
   }
 
   private static solveQuadratic(left: string, right: string): Solution {
-    // Only support ax^2+bx+c=0 format
+    // Determine which side has the quadratic term
     let quadSide = left.includes('^2') ? left : right;
-    let quadRight = left.includes('^2') ? right : left;
+    let otherSide = left.includes('^2') ? right : left;
     
-    if (quadRight !== '0') {
-      throw new Error('শুধুমাত্র ax²+bx+c=0 ধরনের সমীকরণ সমর্থিত');
+    // If right side is not 0, move everything to left side
+    if (otherSide !== '0') {
+      // Parse the other side and subtract from quadratic side
+      const otherValue = this.parseConstant(otherSide);
+      
+      // Rearrange: ax^2 + bx = c becomes ax^2 + bx - c = 0
+      // Extract existing constant from quadSide
+      const constantMatch = quadSide.match(/([+-]?\d+)$/);
+      const existingConstant = constantMatch ? parseInt(constantMatch[1]) : 0;
+      
+      // Remove existing constant if present
+      if (constantMatch) {
+        quadSide = quadSide.replace(/([+-]?\d+)$/, '');
+      }
+      
+      // Calculate new constant: existing - other
+      const newConstant = existingConstant - otherValue;
+      
+      // Append new constant
+      if (newConstant !== 0) {
+        quadSide += (newConstant > 0 ? '+' : '') + newConstant;
+      }
+      
+      otherSide = '0';
     }
 
-    // Enhanced regex to handle more variations
-    let match = quadSide.match(/([+-]?\d*)x\^?2([+-]?\d*)x?([+-]?\d*)/i);
+    // Enhanced regex to handle more variations: ax^2+bx+c or ax^2±bx±c
+    let match = quadSide.match(/([+-]?\d*)x\^2([+-]?\d*)x?([+-]?\d*)/i);
     if (!match) {
-      throw new Error('দয়া করে ax²+bx+c=0 এর মত সমীকরণ দিন');
+      throw new Error('দয়া করে ax²+bx+c আকারে সমীকরণ দিন');
     }
 
     let a = this.parseCoefficient(match[1], 1);
@@ -987,9 +1020,16 @@ export class AlgebraSolver {
   }
 
   private static parseCoefficient(coeffStr: string, defaultValue: number): number {
-    if (!coeffStr || coeffStr === '+') return defaultValue;
+    if (!coeffStr || coeffStr === '+' || coeffStr === '') return defaultValue;
     if (coeffStr === '-') return -defaultValue;
     return Number(coeffStr) || defaultValue;
+  }
+
+  private static parseConstant(expr: string): number {
+    // Parse a simple constant expression
+    const cleaned = expr.replace(/\s/g, '');
+    const num = parseInt(cleaned);
+    return isNaN(num) ? 0 : num;
   }
 
   private static solveHCF(problem: string): Solution {
